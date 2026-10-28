@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ноты">
+<link rel="apple-touch-icon" href="icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Ноты каждый день</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: one 560px column. A quiet header with the streak, today's goal as a thin bar,
+   the staff card as the single focal point, and an answer row drawn as one octave of piano keys.
+   Progress and the cheat sheet sit below. Amber (piano pedal brass) is the only accent. */
+:root{
+  --bg:#E8ECF0; --surface:#F7F9FB; --ink:#18212C; --muted:#586577; --staff:#2B3643; --hair:#C7D0DA; --cell:#DAE0E7;
+  --accent:#D6A032; --on-accent:#18212C; --accent-text:#7C5200;
+  --good:#2B7A52; --on-good:#FFFFFF; --bad:#B03A30; --on-bad:#FFFFFF;
+  --key:#FFFFFF; --key-ink:#18212C; --key-edge:#B4BFCB; --key-shadow:#9AA7B5; --black-key:#1A222C;
+  --font-display:'Spectral', Georgia, 'Times New Roman', serif;
+  --font-ui:'Onest', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11161C; --surface:#1A212A; --ink:#E9EDF2; --muted:#9BA8B8; --staff:#B5C0CD; --hair:#2D3744; --cell:#262E39;
+    --accent:#E3B04B; --on-accent:#14181F; --accent-text:#EDC06A;
+    --good:#63C28F; --on-good:#0E1A14; --bad:#F27E70; --on-bad:#1E0B09;
+    --key:#DCE1E8; --key-ink:#18212C; --key-edge:#8794A3; --key-shadow:#5E6B7A; --black-key:#0B0F14;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11161C; --surface:#1A212A; --ink:#E9EDF2; --muted:#9BA8B8; --staff:#B5C0CD; --hair:#2D3744; --cell:#262E39;
+  --accent:#E3B04B; --on-accent:#14181F; --accent-text:#EDC06A;
+  --good:#63C28F; --on-good:#0E1A14; --bad:#F27E70; --on-bad:#1E0B09;
+  --key:#DCE1E8; --key-ink:#18212C; --key-edge:#8794A3; --key-shadow:#5E6B7A; --black-key:#0B0F14;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font:400 16px/1.5 var(--font-ui); -webkit-text-size-adjust:100%;
+  padding-block:18px 40px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent-text); outline-offset:2px}
+.wrap{max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+h1,h2,h3,p,dl,dd,ol,figure{margin:0}
+
+/* header + goal */
+.top{display:flex; align-items:baseline; justify-content:space-between; gap:6px 16px; flex-wrap:wrap}
+h1{font:600 28px/1.1 var(--font-display); letter-spacing:-.01em; text-wrap:balance}
+.streak{font-size:14px; color:var(--muted)}
+.streak b{font:600 22px var(--font-display); color:var(--ink); margin-right:1px; font-variant-numeric:tabular-nums}
+.goal-row{display:flex; justify-content:space-between; gap:12px; font-size:14px; color:var(--muted); margin-bottom:6px; font-variant-numeric:tabular-nums}
+.bar{height:8px; border-radius:4px; background:var(--cell); overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .3s}
+.goal.done .bar i{background:var(--good)}
+
+/* levels */
+.lvbs{display:grid; grid-template-columns:repeat(6,1fr); gap:6px}
+.lvb{position:relative; min-height:44px; border:1px solid var(--hair); background:var(--surface); color:var(--ink); border-radius:10px; font:600 16px var(--font-ui); cursor:pointer}
+.lvb[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.lvb.done::after{content:"✓"; position:absolute; top:2px; right:6px; font-size:10px; line-height:1; color:var(--good)}
+.lvb[aria-pressed="true"].done::after{color:var(--on-accent)}
+.lv-desc{margin-top:10px; font-size:14px; color:var(--muted)}
+.lv-desc strong{color:var(--ink); font-weight:600}
+
+/* stage */
+.stage{display:flex; flex-direction:column; gap:12px}
+.card{background:var(--surface); border:1px solid var(--hair); border-radius:14px; padding:6px 8px 8px}
+.staff{display:block; width:100%; height:auto}
+.sline{stroke:var(--staff); stroke-width:1.2}
+.ledger{stroke:var(--staff); stroke-width:1.6; stroke-linecap:round}
+.clef{fill:var(--ink)}
+.note .head{fill:var(--ink)}
+.note .stem{stroke:var(--ink); stroke-width:1.6}
+.note .nl{fill:var(--muted); font:600 12px var(--font-ui)}
+.note-right .head{fill:var(--good)} .note-right .stem{stroke:var(--good)} .note-right .nl{fill:var(--good)}
+.note-wrong .head{fill:var(--bad)} .note-wrong .stem{stroke:var(--bad)} .note-wrong .nl{fill:var(--bad)}
+.ghost .head{fill:none; stroke:var(--accent-text); stroke-width:1.6; stroke-dasharray:3 2}
+.ghost .ledger{stroke:var(--accent-text); stroke-dasharray:3 2}
+.ghost .nl{fill:var(--accent-text); font:600 12px var(--font-ui)}
+.hintline{margin:2px 6px 4px; font-size:14px; color:var(--accent-text)}
+
+.fb{min-height:64px}
+.fb-main{display:flex; align-items:center; gap:8px; font-weight:500; font-size:17px}
+.fb-main svg{flex:none; width:20px; height:20px}
+.fb-main.right{color:var(--good)}
+.fb-main.wrong{color:var(--bad)}
+.fb-sub{margin-top:2px; font-size:14px; color:var(--muted)}
+
+.keys{display:grid; grid-template-columns:repeat(7,1fr); gap:5px}
+.key{
+  position:relative; height:104px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:12px;
+  background:var(--key); color:var(--key-ink); border:1px solid var(--key-edge); border-radius:4px 4px 10px 10px;
+  box-shadow:0 3px 0 var(--key-shadow); font:600 16px var(--font-ui); cursor:pointer;
+  transition:transform .06s, box-shadow .06s;
+}
+.key:active{transform:translateY(2px); box-shadow:0 1px 0 var(--key-shadow)}
+.key .k-num{position:absolute; top:7px; left:0; right:0; text-align:center; font:500 11px var(--font-ui); opacity:.55}
+.key.right{background:var(--good); border-color:var(--good); color:var(--on-good)}
+.key.wrong{background:var(--bad); border-color:var(--bad); color:var(--on-bad)}
+.key.reveal{background:var(--good); border-color:var(--good); color:var(--on-good)}
+@media (hover:none){ .key .k-num{display:none} }
+
+.actions{display:flex; align-items:center; gap:10px; min-height:46px}
+.slot{flex:1; display:flex}
+.slot .btn{flex:1}
+.btn{min-height:44px; padding:0 16px; border-radius:10px; border:1px solid var(--hair); background:var(--surface); color:var(--ink); font:500 15px var(--font-ui); cursor:pointer}
+.btn.primary{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+.btn.quiet{background:transparent; border-color:transparent; color:var(--muted)}
+.btn:disabled{opacity:.55; cursor:default}
+
+.strip svg{display:block; width:100%; height:auto}
+.strip figcaption{margin-top:6px; font-size:13px; color:var(--muted)}
+.wk{fill:var(--key); stroke:var(--key-edge); stroke-width:1}
+.wk.on{fill:var(--accent); stroke:var(--accent-text)}
+.bk{fill:var(--black-key)}
+.c-lbl{font:500 9px var(--font-ui); fill:var(--muted)}
+.t-lbl{font:600 10px var(--font-ui); fill:var(--on-accent)}
+
+/* progress */
+.progress{display:flex; flex-direction:column; gap:12px; padding-top:18px; border-top:1px solid var(--hair)}
+h2{font:600 24px/1.2 var(--font-display); text-wrap:balance}
+h3{font:600 12px/1.3 var(--font-ui); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:8px}
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px 16px}
+.stats dt{font-size:13px; color:var(--muted)}
+.stats dd{font:600 28px/1.1 var(--font-display); font-variant-numeric:tabular-nums}
+.calh,.cal{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
+.calh span{font-size:11px; color:var(--muted); text-align:center}
+.cal i{aspect-ratio:1; border-radius:6px; background:var(--cell); display:grid; place-items:center; font:500 11px var(--font-ui); font-style:normal; color:var(--muted)}
+.cal i.part{background:color-mix(in srgb, var(--accent) 40%, var(--cell)); color:var(--ink)}
+.cal i.full{background:var(--accent); color:var(--on-accent)}
+.cal i.today{outline:2px solid var(--ink); outline-offset:1px}
+.cal i.future{opacity:.35}
+.cal-note{font-size:13px; color:var(--muted)}
+.lvlist{list-style:none; padding:0; display:flex; flex-direction:column; gap:10px}
+.lvlist li{display:grid; grid-template-columns:24px 1fr auto; gap:2px 10px; align-items:center; font-size:14px}
+.lvlist .n{font:600 15px var(--font-display); color:var(--muted)}
+.lvlist .st{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
+.lvlist .st.ok{color:var(--good); font-weight:500}
+.lvlist .mini{grid-column:2 / 4; height:5px; border-radius:3px; background:var(--cell); overflow:hidden}
+.lvlist .mini i{display:block; height:100%; background:var(--accent)}
+.weak{list-style:none; padding:0; display:flex; flex-direction:column; gap:6px; font-size:14px}
+.weak li{display:flex; justify-content:space-between; gap:12px}
+.weak span{color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap}
+.empty{font-size:14px; color:var(--muted)}
+.seg{display:flex; gap:6px}
+.seg button{flex:1; min-height:44px; border-radius:10px; border:1px solid var(--hair); background:var(--surface); color:var(--ink); font:500 15px var(--font-ui); cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+
+/* cheat sheet */
+details.sheet{border:1px solid var(--hair); border-radius:14px; background:var(--surface)}
+details.sheet summary{padding:14px 16px; font-weight:500; cursor:pointer; list-style:none; display:flex; justify-content:space-between; gap:12px}
+details.sheet summary::-webkit-details-marker{display:none}
+details.sheet summary::after{content:"+"; color:var(--muted); font-size:20px; line-height:1}
+details.sheet[open] summary::after{content:"–"}
+.sheet-body{padding:0 12px 16px; display:flex; flex-direction:column; gap:10px}
+.sheet-body h3{margin:6px 4px 0}
+.sheet-body p{font-size:14px; color:var(--muted); margin:0 4px}
+.foot{font-size:13px; color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+@media (max-width:380px){ h1{font-size:25px} .key{height:96px} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Ноты каждый день</h1>
+    <div class="streak" id="streak"></div>
+  </header>
+
+  <section class="goal" id="goal" aria-label="Цель на сегодня">
+    <div class="goal-row"><span>Сегодня</span><span id="goalTxt"></span></div>
+    <div class="bar" id="bar" role="progressbar" aria-label="Нот сегодня" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0"><i id="barFill"></i></div>
+  </section>
+
+  <section aria-label="Уровень">
+    <div class="lvbs" id="lvbs" role="group" aria-label="Выбор уровня"></div>
+    <p class="lv-desc"><strong id="lvTitle"></strong><br><span id="lvSub"></span></p>
+  </section>
+
+  <section class="stage" aria-label="Тренировка">
+    <div class="card">
+      <svg id="staff" class="staff" viewBox="0 0 360 152" role="img" aria-label="Нота на нотном стане"></svg>
+      <p class="hintline" id="hintLine" hidden></p>
+    </div>
+    <div class="fb" id="fb" role="status" aria-live="polite"></div>
+    <div class="keys" id="keys"></div>
+    <div class="actions">
+      <div class="slot">
+        <button type="button" class="btn" id="hintBtn">Подсказка</button>
+        <button type="button" class="btn primary" id="nextBtn" hidden>Дальше</button>
+      </div>
+      <button type="button" class="btn quiet" id="soundBtn" aria-pressed="true">Звук включён</button>
+    </div>
+    <figure class="strip">
+      <svg id="strip" viewBox="0 0 336 77" role="img" aria-label="Клавиатура пианино, две октавы"></svg>
+      <figcaption id="stripCap"></figcaption>
+    </figure>
+  </section>
+
+  <section class="progress" aria-labelledby="progH">
+    <h2 id="progH">Мой прогресс</h2>
+    <dl class="stats" id="stats"></dl>
+    <h3>Последние четыре недели</h3>
+    <div id="cal" role="img" aria-label="Календарь занятий за четыре недели"></div>
+    <p class="cal-note">Яркая клетка: цель дня выполнена. Бледная: занималась, но цель не добрана.</p>
+    <h3>Уровни</h3>
+    <ol class="lvlist" id="lvlist"></ol>
+    <h3>Чаще всего путаются</h3>
+    <div id="weak"></div>
+    <h3>Нот в день</h3>
+    <div class="seg" id="goalSeg" role="group" aria-label="Цель на день"></div>
+  </section>
+
+  <details class="sheet">
+    <summary>Шпаргалка: где какая нота</summary>
+    <div class="sheet-body">
+      <h3>Скрипичный ключ</h3>
+      <svg id="sheetT" class="staff" viewBox="0 0 360 152" role="img" aria-label="Ноты от до первой октавы до фа второй в скрипичном ключе"></svg>
+      <p>Линейки снизу вверх: ми, соль, си, ре, фа. Промежутки: фа, ля, до, ми.</p>
+      <h3>Басовый ключ</h3>
+      <svg id="sheetB" class="staff" viewBox="0 0 360 152" role="img" aria-label="Ноты от соль большой октавы до до первой в басовом ключе"></svg>
+      <p>Линейки снизу вверх: соль, си, ре, фа, ля. Промежутки: ля, до, ми, соль.</p>
+      <p>«До первой октавы» пишется на добавочной линейке: под скрипичным станом и над басовым. Это одна и та же клавиша, примерно в середине клавиатуры.</p>
+    </div>
+  </details>
+
+  <p class="foot" id="saveNote"></p>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const CLEF_G = 'M434 2Q464 -103 464 -170Q464 -223 427 -257Q390 -291 337 -291Q287 -291 250 -261.5Q213 -232 213 -190Q213 -160 233.5 -133.5Q254 -107 283.5 -107Q313 -107 331.5 -128.5Q350 -150 350 -178Q350 -240 280 -240Q298 -268 338 -268Q353 -268 368.5 -263.5Q384 -259 401 -248Q418 -237 428.5 -213.5Q439 -190 439 -157Q439 -136 411 -6Q389 -12 356 -12Q259 -12 189.5 60Q120 132 120 232Q120 267 131.5 303Q143 339 157.5 366.5Q172 394 200.5 428.5Q229 463 248.5 483.5Q268 504 303 539Q280 621 280 689Q280 779 313 839.5Q346 900 379 900Q389 900 401.5 887Q414 874 426 851Q438 828 446.5 790.5Q455 753 455 710Q455 551 342 447L368 329Q384 332 397 332Q458 332 500 282.5Q542 233 542 162Q542 44 434 2ZM426 746Q426 801 394 801Q358 801 333 748Q308 695 308 630Q308 588 321 557Q359 580 392.5 639.5Q426 699 426 746ZM498 128Q498 183 466 216Q434 249 383 249L428 23Q498 52 498 128ZM407 17 361 247Q334 241 311.5 214Q289 187 289 158Q289 143 295 128.5Q301 114 309.5 104Q318 94 327 86Q336 78 342 74.5Q348 71 348 71L340 66Q307 75 277.5 106Q248 137 248 184Q248 231 277.5 270.5Q307 310 343 323L325 430Q168 299 168 177Q168 104 223 55Q278 6 348 6Q365 6 407 17Z';
+const CLEF_F = 'M564 704Q582 704 594.5 691Q607 678 607 661Q607 644 593 631Q579 618 563 618Q521 618 521 663Q521 681 534 692.5Q547 704 564 704ZM607 469Q607 450 594 437Q581 424 564 424Q521 424 521 469Q521 485 533.5 498Q546 511 564 511Q582 511 594.5 497Q607 483 607 469ZM285 757Q366 757 421 701.5Q476 646 476 569Q476 531 465.5 495Q455 459 432 426.5Q409 394 386 367Q363 340 326 313Q289 286 264 267.5Q239 249 196.5 226Q154 203 135.5 193.5Q117 184 80 166L75 182Q76 183 102 200Q128 217 144 227.5Q160 238 191.5 263Q223 288 244 309.5Q265 331 291.5 363.5Q318 396 334 427Q350 458 361.5 498Q373 538 373 578Q373 735 262 735Q225 735 199 725.5Q173 716 161.5 702Q150 688 145 677.5Q140 667 140 659Q140 644 160 644Q168 644 179 647.5Q190 651 194 651Q221 651 239 634Q257 617 257 592Q257 563 235 544Q213 525 183 525Q144 525 119 548Q94 571 94 607Q94 673 150.5 715Q207 757 285 757Z';
+
+/* ---------- music helpers ---------- */
+const NAMES = ['До','Ре','Ми','Фа','Соль','Ля','Си'];
+const SEM = [0,2,4,5,7,9,11];
+const OCT_RU = {1:'контроктавы',2:'большой октавы',3:'малой октавы',4:'первой октавы',5:'второй октавы',6:'третьей октавы'};
+const OCT_SHORT = {1:'контр',2:'большой',3:'малой',4:'первой',5:'второй',6:'третьей'};
+const letterOf = s => ((s % 7) + 7) % 7;
+const octOf = s => Math.floor(s / 7);
+const midiOf = s => 12 * (octOf(s) + 1) + SEM[letterOf(s)];
+const fullName = s => NAMES[letterOf(s)].toLowerCase() + ' ' + OCT_RU[octOf(s)];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const plural = (n,a,b,c) => { const m = n % 100, d = n % 10; if (m > 10 && m < 20) return c; if (d === 1) return a; if (d >= 2 && d <= 4) return b; return c; };
+const sum = a => a.reduce((x,y) => x + y, 0);
+const $ = id => document.getElementById(id);
+// step = octave*7 + letter (C=0). Bottom staff line: E4 = 30 in treble, G2 = 18 in bass.
+const BASE = {treble:30, bass:18};
+const pos = (clef, s) => s - BASE[clef];
+
+const LEVELS = [
+  {id:1, title:'Скрипичный ключ: пять нот', sub:'Ноты до, ре, ми, фа, соль первой октавы. Так лежат пять пальцев правой руки.', r:[['treble',28,32]]},
+  {id:2, title:'Скрипичный ключ: октава', sub:'От до первой октавы до до второй: добавляются ля, си и верхнее до.', r:[['treble',28,35]]},
+  {id:3, title:'Скрипичный ключ: шире', sub:'От до первой октавы до соль второй. Самая нижняя нота стоит на добавочной линейке.', r:[['treble',28,39]]},
+  {id:4, title:'Басовый ключ: пять нот', sub:'Ноты до, ре, ми, фа, соль малой октавы. Так лежат пять пальцев левой руки.', r:[['bass',21,25]]},
+  {id:5, title:'Басовый ключ: шире', sub:'От соль большой октавы до до первой октавы.', r:[['bass',18,28]]},
+  {id:6, title:'Оба ключа вместе', sub:'Ноты уровней 3 и 5 вперемешку, как в настоящих пьесах.', r:[['treble',28,39],['bass',18,28]]}
+];
+
+const LANDMARKS = {
+  treble:[
+    {s:28, t:'до первой октавы на добавочной линейке под станом'},
+    {s:32, t:'соль на второй линейке снизу, внутри завитка ключа'},
+    {s:35, t:'до второй октавы в третьем промежутке снизу'}
+  ],
+  bass:[
+    {s:21, t:'до малой октавы во втором промежутке снизу'},
+    {s:24, t:'фа на четвёртой линейке снизу, между двумя точками ключа'},
+    {s:28, t:'до первой октавы на добавочной линейке над станом'}
+  ]
+};
+
+/* ---------- staff drawing ---------- */
+const S = 16, X0 = 10, X1 = 350, TOP = 44, BOT = TOP + 4 * S;
+const NOTE_X = 232, GHOST_X = 150;
+const pY = p => BOT - p * S / 2;
+
+function clefMarkup(clef){
+  if (clef === 'treble'){
+    const k = S / 183;
+    return '<path class="clef" transform="translate(' + (22 - 120 * k).toFixed(2) + ' ' + (pY(2) + 218 * k).toFixed(2) + ') scale(' + k.toFixed(5) + ' ' + (-k).toFixed(5) + ')" d="' + CLEF_G + '"/>';
+  }
+  const k = S / 193.5;
+  return '<path class="clef" transform="translate(' + (22 - 75 * k).toFixed(2) + ' ' + (pY(6) + 564 * k).toFixed(2) + ') scale(' + k.toFixed(5) + ' ' + (-k).toFixed(5) + ')" d="' + CLEF_F + '"/>';
+}
+
+function noteMarkup(it){
+  const cx = it.cx, p = it.p, y = pY(p);
+  let m = '<g class="note ' + (it.cls || '') + '">';
+  for (let q = -2; q > p - 1; q -= 2) m += '<line class="ledger" x1="' + (cx - 15) + '" x2="' + (cx + 15) + '" y1="' + pY(q) + '" y2="' + pY(q) + '"/>';
+  for (let q = 10; q < p + 1; q += 2) m += '<line class="ledger" x1="' + (cx - 15) + '" x2="' + (cx + 15) + '" y1="' + pY(q) + '" y2="' + pY(q) + '"/>';
+  m += '<ellipse class="head" cx="' + cx + '" cy="' + y + '" rx="9.4" ry="7.3" transform="rotate(-18 ' + cx + ' ' + y + ')"/>';
+  if (it.stem !== false){
+    if (p < 4) m += '<line class="stem" x1="' + (cx + 8.7) + '" x2="' + (cx + 8.7) + '" y1="' + (y - 1) + '" y2="' + (y - 3.4 * S) + '"/>';
+    else m += '<line class="stem" x1="' + (cx - 8.7) + '" x2="' + (cx - 8.7) + '" y1="' + (y + 1) + '" y2="' + (y + 3.4 * S) + '"/>';
+  }
+  if (it.label) m += '<text class="nl" x="' + cx + '" y="146" text-anchor="middle">' + it.label + '</text>';
+  return m + '</g>';
+}
+
+function staffMarkup(clef, items){
+  let m = '';
+  for (let i = 0; i < 5; i++){ const y = pY(i * 2); m += '<line class="sline" x1="' + X0 + '" x2="' + X1 + '" y1="' + y + '" y2="' + y + '"/>'; }
+  m += '<line class="sline" x1="' + X0 + '" x2="' + X0 + '" y1="' + pY(8) + '" y2="' + pY(0) + '"/>';
+  m += '<line class="sline" x1="' + X1 + '" x2="' + X1 + '" y1="' + pY(8) + '" y2="' + pY(0) + '"/>';
+  m += clefMarkup(clef);
+  items.forEach(it => { m += noteMarkup(it); });
+  return m;
+}
+
+function sheetMarkup(clef, a, b){
+  const items = [], n = b - a + 1, x0 = 84, x1 = 342;
+  for (let s = a; s <= b; s++){
+    items.push({cx: x0 + (x1 - x0) * (s - a) / (n - 1), p: pos(clef, s), stem:false, label: NAMES[letterOf(s)]});
+  }
+  return staffMarkup(clef, items);
+}
+
+function stripMarkup(step, hi){
+  const o = octOf(step) - 1, w = 24, h = 76, bh = 46, bw = 15;
+  let wk = '', bk = '';
+  for (let i = 0; i < 14; i++){
+    const st = o * 7 + i, L = i % 7, on = hi && st === step;
+    wk += '<rect class="wk' + (on ? ' on' : '') + '" x="' + (i * w + 0.5) + '" y="0.5" width="' + (w - 1) + '" height="' + h + '" rx="3"/>';
+    if (on) wk += '<text class="t-lbl" x="' + (i * w + w / 2) + '" y="' + (h - 7) + '" text-anchor="middle">' + NAMES[L] + '</text>';
+    else if (L === 0) wk += '<text class="c-lbl" x="' + (i * w + w / 2) + '" y="' + (h - 7) + '" text-anchor="middle">до</text>';
+    if ((L === 0 || L === 1 || L === 3 || L === 4 || L === 5) && i < 13) bk += '<rect class="bk" x="' + ((i + 1) * w - bw / 2) + '" y="0.5" width="' + bw + '" height="' + bh + '" rx="2"/>';
+  }
+  return wk + bk;
+}
+
+/* ---------- sound ---------- */
+let actx = null;
+function audio(){
+  try {
+    if (!actx){ const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  } catch (e) { return null; }
+}
+function play(step){
+  if (!state.sound) return;
+  const c = audio(); if (!c) return;
+  try {
+    const f = 440 * Math.pow(2, (midiOf(step) - 69) / 12), t = c.currentTime;
+    const master = c.createGain();
+    master.gain.setValueAtTime(0.0001, t);
+    master.gain.exponentialRampToValueAtTime(0.32, t + 0.008);
+    master.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = Math.min(6000, f * 7);
+    master.connect(lp); lp.connect(c.destination);
+    [[1,1,'triangle'],[2,0.35,'sine'],[3,0.15,'sine'],[4,0.06,'sine']].forEach(h => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = h[2]; o.frequency.value = f * h[0]; g.gain.value = h[1];
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + 1.9);
+    });
+  } catch (e) {}
+}
+
+/* ---------- state + storage ---------- */
+const LS_KEY = 'noty-kazhdyi-den-v1';
+const defaults = () => ({v:1, days:{}, notes:{}, lv:{}, goal:20, sound:true, level:1, updated:0});
+function normalize(o){
+  const d = defaults();
+  if (!o || typeof o !== 'object') return d;
+  let c; try { c = JSON.parse(JSON.stringify(o)); } catch (e) { return d; }
+  if (c.days && typeof c.days === 'object') d.days = c.days;
+  if (c.notes && typeof c.notes === 'object') d.notes = c.notes;
+  if (c.lv && typeof c.lv === 'object') d.lv = c.lv;
+  if (c.goal === 10 || c.goal === 20 || c.goal === 40) d.goal = c.goal;
+  d.sound = c.sound !== false;
+  if (LEVELS.some(l => l.id === c.level)) d.level = c.level;
+  d.updated = +c.updated || 0;
+  return d;
+}
+let state = defaults();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) state = normalize(JSON.parse(raw)); } catch (e) {}
+
+const pad = n => (n < 10 ? '0' : '') + n;
+const dayKey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const addDays = (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
+const parseKey = k => { const a = k.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2], 12); };
+const noon = () => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; };
+const reached = r => !!r && r.n >= (r.g || 20);
+
+(function prune(){
+  const cut = dayKey(addDays(noon(), -400));
+  Object.keys(state.days).forEach(k => { if (k < cut) delete state.days[k]; });
+})();
+
+let remote = null, rTimer = 0, rBusy = false, rDirty = false;
+function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+function touch(){ state.updated = Date.now(); saveLocal(); scheduleRemote(); }
+function scheduleRemote(){ if (!remote) return; rDirty = true; clearTimeout(rTimer); rTimer = setTimeout(flushRemote, 900); }
+async function flushRemote(){
+  if (!remote || rBusy || !rDirty) return;
+  rBusy = true; rDirty = false;
+  try { await remote.set(JSON.parse(JSON.stringify(state))); }
+  catch (e) { remote = null; renderSaveNote(); }
+  finally { rBusy = false; if (rDirty) scheduleRemote(); }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && rDirty){ clearTimeout(rTimer); flushRemote(); } });
+
+async function initRemote(){
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const got = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    const db = got[0], user = got[1];
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    const ref = db.collection('data/users/' + id).doc('progress');
+    const snap = await ref.get();
+    let remoteUpdated = -1;
+    if (snap.exists){
+      const r = normalize(snap.data());
+      remoteUpdated = r.updated;
+      if (r.updated > state.updated){ state = r; saveLocal(); refreshAll(); }
+    }
+    remote = ref;
+    if (state.updated > 0 && state.updated > remoteUpdated){ rDirty = true; flushRemote(); }
+    renderSaveNote();
+  } catch (e) { renderSaveNote(); }
+}
+
+/* ---------- progress math ---------- */
+function todayRec(){
+  const k = dayKey(new Date());
+  return state.days[k] || (state.days[k] = {n:0, ok:0, g:state.goal});
+}
+function streakNow(){
+  let d = noon();
+  if (!reached(state.days[dayKey(d)])) d = addDays(d, -1);
+  let n = 0;
+  while (reached(state.days[dayKey(d)])){ n++; d = addDays(d, -1); }
+  return n;
+}
+function bestStreak(){
+  const keys = Object.keys(state.days).filter(k => reached(state.days[k])).sort();
+  let best = 0, run = 0, prev = null;
+  keys.forEach(k => {
+    if (prev && dayKey(addDays(parseKey(prev), 1)) === k) run++; else run = 1;
+    if (run > best) best = run;
+    prev = k;
+  });
+  return best;
+}
+
+/* ---------- practice ---------- */
+const el = {
+  streak:$('streak'), goal:$('goal'), goalTxt:$('goalTxt'), bar:$('bar'), barFill:$('barFill'),
+  lvbs:$('lvbs'), lvTitle:$('lvTitle'), lvSub:$('lvSub'),
+  staff:$('staff'), hintLine:$('hintLine'), fb:$('fb'), keys:$('keys'),
+  hintBtn:$('hintBtn'), nextBtn:$('nextBtn'), soundBtn:$('soundBtn'), strip:$('strip'), stripCap:$('stripCap'),
+  stats:$('stats'), cal:$('cal'), lvlist:$('lvlist'), weak:$('weak'), goalSeg:$('goalSeg'), saveNote:$('saveNote')
+};
+let cur = null, phase = 'ask', usedHint = false, lastKey = '', timer = 0;
+
+const level = () => LEVELS.filter(l => l.id === state.level)[0] || LEVELS[0];
+function poolFor(l){
+  const out = [];
+  l.r.forEach(r => { for (let s = r[1]; s <= r[2]; s++) out.push({clef:r[0], step:s, key:r[0].charAt(0) + s}); });
+  return out;
+}
+function pick(){
+  const pool = poolFor(level());
+  const cand = pool.length > 1 ? pool.filter(n => n.key !== lastKey) : pool;
+  let tot = 0;
+  const ws = cand.map(n => {
+    const st = state.notes[n.key], t = st ? st.r + st.w : 0;
+    const w = t === 0 ? 2 : 1 + 3 * ((st.w + 1) / (t + 2));
+    tot += w; return w;
+  });
+  let r = Math.random() * tot;
+  for (let i = 0; i < cand.length; i++){ r -= ws[i]; if (r <= 0) return cand[i]; }
+  return cand[cand.length - 1];
+}
+function nearestLm(){
+  const list = LANDMARKS[cur.clef];
+  let best = list[0];
+  list.forEach(l => { if (Math.abs(l.s - cur.step) < Math.abs(best.s - cur.step)) best = l; });
+  return best;
+}
+
+const ICON = {
+  right:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>',
+  wrong:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>'
+};
+function setFb(kind, main, sub){
+  el.fb.innerHTML = '<p class="fb-main ' + kind + '">' + (ICON[kind] || '') + '<span>' + main + '</span></p>' + (sub ? '<p class="fb-sub">' + sub + '</p>' : '');
+}
+
+function drawStaff(result){
+  const main = {cx:NOTE_X, p:pos(cur.clef, cur.step), cls:result ? 'note-' + result : ''};
+  if (result) main.label = NAMES[letterOf(cur.step)];
+  const items = [main];
+  if (usedHint){
+    const lm = nearestLm();
+    if (lm.s !== cur.step) items.push({cx:GHOST_X, p:pos(cur.clef, lm.s), cls:'ghost', stem:false, label:NAMES[letterOf(lm.s)]});
+  }
+  el.staff.innerHTML = staffMarkup(cur.clef, items);
+}
+function drawStrip(hi){
+  el.strip.innerHTML = stripMarkup(cur.step, hi);
+  el.stripCap.textContent = hi
+    ? cap(fullName(cur.step)) + ': эта клавиша подсвечена.'
+    : 'Найти «до»: это белая клавиша слева от двух чёрных.';
+}
+
+function newQuestion(){
+  clearTimeout(timer);
+  phase = 'ask'; usedHint = false;
+  cur = pick(); lastKey = cur.key;
+  drawStaff(null);
+  el.hintLine.hidden = true; el.hintLine.textContent = '';
+  el.hintBtn.hidden = false; el.hintBtn.disabled = false; el.nextBtn.hidden = true;
+  Array.prototype.forEach.call(el.keys.children, k => { k.className = 'key'; });
+  setFb('', 'Какая это нота?', state.updated === 0 ? 'Нажмите клавишу с названием внизу. Если не получается, возьмите «Подсказку».' : '');
+  drawStrip(false);
+}
+
+function showHint(){
+  if (phase !== 'ask' || usedHint) return;
+  usedHint = true;
+  const lm = nearestLm(), d = cur.step - lm.s;
+  let rel;
+  if (d === 0) rel = 'Это и есть ориентир.';
+  else { const n = Math.abs(d); rel = 'Ваша нота на ' + n + ' ' + plural(n, 'ступень', 'ступени', 'ступеней') + ' ' + (d > 0 ? 'выше' : 'ниже') + ' (ступень: от линейки к соседнему промежутку или наоборот).'; }
+  el.hintLine.textContent = 'Ориентир: ' + lm.t + '. ' + rel;
+  el.hintLine.hidden = false;
+  el.hintBtn.disabled = true;
+  drawStaff(null);
+}
+
+function answer(L){
+  if (phase !== 'ask') return;
+  const ok = L === letterOf(cur.step);
+  phase = ok ? 'right' : 'wrong';
+  const rec = todayRec(); rec.n++;
+  const extra = [];
+  if (!usedHint){
+    if (ok) rec.ok = (rec.ok || 0) + 1;
+    const nk = state.notes[cur.key] || (state.notes[cur.key] = {r:0, w:0});
+    if (ok) nk.r++; else nk.w++;
+    const lv = state.lv[state.level] || (state.lv[state.level] = {recent:[], done:false});
+    lv.recent.push(ok ? 1 : 0); if (lv.recent.length > 20) lv.recent.shift();
+    if (!lv.done && lv.recent.length >= 20 && sum(lv.recent) >= 18){
+      lv.done = true; extra.push('Уровень освоен: 18 ответов из 20 верные. Можно переходить к следующему.');
+    }
+  }
+  if (rec.n === (rec.g || state.goal)) extra.push('Цель на сегодня выполнена. Можно продолжить или закончить.');
+  touch();
+
+  const btns = el.keys.children;
+  btns[L].classList.add(ok ? 'right' : 'wrong');
+  if (!ok) btns[letterOf(cur.step)].classList.add('reveal');
+  drawStaff(ok ? 'right' : 'wrong');
+  drawStrip(true);
+  play(cur.step);
+
+  const name = fullName(cur.step);
+  let main, sub = extra.join(' ');
+  if (ok) main = usedHint ? 'Верно, с подсказкой. Это ' + name + '.' : 'Верно. Это ' + name + '.';
+  else main = 'Не совсем. Это ' + name + ', а вы выбрали «' + NAMES[L].toLowerCase() + '».';
+  if (usedHint) sub = ('С подсказкой ответ не идёт в точность. ' + sub).trim();
+  setFb(ok ? 'right' : 'wrong', main, sub);
+
+  el.hintBtn.hidden = true; el.nextBtn.hidden = false;
+  if (ok) timer = setTimeout(newQuestion, extra.length ? 2600 : 1100);
+  else { try { el.nextBtn.focus({preventScroll:true}); } catch (e) {} }
+  renderTop(); renderProgress(); renderLevels();
+}
+function next(){ if (phase === 'ask') return; newQuestion(); }
+
+/* ---------- rendering ---------- */
+function renderTop(){
+  const s = streakNow();
+  el.streak.innerHTML = s > 0 ? '<b>' + s + '</b> ' + plural(s, 'день', 'дня', 'дней') + ' подряд' : 'Серия начнётся с первой выполненной цели';
+  const r = state.days[dayKey(new Date())];
+  const n = r ? r.n : 0, g = r && r.g ? r.g : state.goal;
+  el.goalTxt.textContent = n >= g ? n + ' · цель выполнена' : n + ' из ' + g + ' нот';
+  el.barFill.style.width = Math.min(100, Math.round(n / g * 100)) + '%';
+  el.bar.setAttribute('aria-valuemax', g); el.bar.setAttribute('aria-valuenow', Math.min(n, g));
+  el.goal.classList.toggle('done', n >= g);
+}
+
+function renderLevels(){
+  el.lvbs.innerHTML = '';
+  LEVELS.forEach(l => {
+    const done = !!(state.lv[l.id] && state.lv[l.id].done);
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'lvb' + (done ? ' done' : '');
+    b.textContent = l.id;
+    b.setAttribute('aria-pressed', String(l.id === state.level));
+    b.setAttribute('aria-label', 'Уровень ' + l.id + (done ? ', освоен' : ''));
+    b.addEventListener('click', () => {
+      if (state.level === l.id) return;
+      state.level = l.id; touch(); renderLevels(); newQuestion();
+    });
+    el.lvbs.appendChild(b);
+  });
+  const l = level();
+  el.lvTitle.textContent = 'Уровень ' + l.id + '. ' + l.title;
+  el.lvSub.textContent = l.sub;
+}
+
+function renderProgress(){
+  const days = Object.keys(state.days);
+  const total = days.reduce((a, k) => a + (state.days[k].n || 0), 0);
+  const practiced = days.filter(k => state.days[k].n > 0).length;
+  el.stats.innerHTML =
+    '<div><dt>Серия</dt><dd>' + streakNow() + '</dd></div>' +
+    '<div><dt>Лучшая серия</dt><dd>' + bestStreak() + '</dd></div>' +
+    '<div><dt>Дней занятий</dt><dd>' + practiced + '</dd></div>' +
+    '<div><dt>Нот сыграно</dt><dd>' + total + '</dd></div>';
+
+  const today = noon(), tk = dayKey(today), dow = (today.getDay() + 6) % 7, start = addDays(today, -(dow + 21));
+  let c = '<div class="calh">' + ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d => '<span>' + d + '</span>').join('') + '</div><div class="cal">';
+  for (let i = 0; i < 28; i++){
+    const d = addDays(start, i), k = dayKey(d), r = state.days[k];
+    let cls = reached(r) ? 'full' : (r && r.n > 0 ? 'part' : '');
+    if (k === tk) cls += ' today';
+    if (k > tk) cls += ' future';
+    c += '<i class="' + cls + '" title="' + d.getDate() + '.' + pad(d.getMonth() + 1) + ': ' + (r ? r.n : 0) + ' нот">' + d.getDate() + '</i>';
+  }
+  el.cal.innerHTML = c + '</div>';
+
+  el.lvlist.innerHTML = LEVELS.map(l => {
+    const lv = state.lv[l.id], rec = lv ? lv.recent : [], pct = rec.length ? Math.round(sum(rec) / rec.length * 100) : 0;
+    const st = lv && lv.done ? '<span class="st ok">освоен</span>' : (rec.length ? '<span class="st">' + pct + '% верно</span>' : '<span class="st">не начат</span>');
+    return '<li><span class="n">' + l.id + '</span><span>' + l.title + '</span>' + st + '<span class="mini"><i style="width:' + pct + '%"></i></span></li>';
+  }).join('');
+
+  const weak = Object.keys(state.notes).map(k => {
+    const n = state.notes[k], t = n.r + n.w;
+    return {k:k, t:t, miss:t ? n.w / t : 0};
+  }).filter(x => x.t >= 3 && x.miss >= 0.25).sort((a, b) => b.miss - a.miss || b.t - a.t).slice(0, 4);
+  if (!weak.length) el.weak.innerHTML = '<p class="empty">Пока мало данных. После нескольких десятков ответов здесь появятся ноты, в которых вы ошибаетесь чаще всего.</p>';
+  else el.weak.innerHTML = '<ul class="weak">' + weak.map(x => {
+    const s = +x.k.slice(1), clef = x.k.charAt(0) === 't' ? 'скрипичный ключ' : 'басовый ключ';
+    return '<li><div><b>' + NAMES[letterOf(s)] + '</b> ' + OCT_SHORT[octOf(s)] + ' октавы, ' + clef + '</div><span>' + Math.round((1 - x.miss) * 100) + '% верно</span></li>';
+  }).join('') + '</ul>';
+
+  el.goalSeg.innerHTML = '';
+  [10, 20, 40].forEach(g => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = g; b.setAttribute('aria-pressed', String(state.goal === g));
+    b.addEventListener('click', () => {
+      state.goal = g;
+      const r = state.days[dayKey(new Date())]; if (r) r.g = g;
+      touch(); renderTop(); renderProgress();
+    });
+    el.goalSeg.appendChild(b);
+  });
+}
+
+function renderSound(){
+  el.soundBtn.textContent = state.sound ? 'Звук включён' : 'Звук выключен';
+  el.soundBtn.setAttribute('aria-pressed', String(state.sound));
+}
+function renderSaveNote(){
+  el.saveNote.textContent = remote
+    ? 'Прогресс сохраняется в вашем аккаунте и на этом устройстве, поэтому он виден и на телефоне, и на компьютере.'
+    : 'Прогресс сохраняется только в этом браузере. На другом устройстве он не появится.';
+}
+function refreshAll(){ renderTop(); renderLevels(); renderProgress(); renderSound(); renderSaveNote(); }
+
+/* ---------- wiring ---------- */
+NAMES.forEach((n, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'key';
+  b.innerHTML = '<span class="k-num">' + (i + 1) + '</span>' + n;
+  b.addEventListener('click', () => answer(i));
+  el.keys.appendChild(b);
+});
+el.hintBtn.addEventListener('click', showHint);
+el.nextBtn.addEventListener('click', next);
+el.soundBtn.addEventListener('click', () => { state.sound = !state.sound; touch(); renderSound(); });
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key >= '1' && e.key <= '7'){ answer(+e.key - 1); return; }
+  if ((e.key === 'Enter' || e.key === ' ') && phase !== 'ask'){ e.preventDefault(); next(); }
+});
+
+el.staff.setAttribute('aria-label', 'Нота на нотном стане');
+$('sheetT').innerHTML = sheetMarkup('treble', 28, 38);
+$('sheetB').innerHTML = sheetMarkup('bass', 18, 28);
+
+refreshAll();
+newQuestion();
+initRemote();
+})();
+</script>
+
+</body>
+</html>
