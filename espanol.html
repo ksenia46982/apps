@@ -1,0 +1,1441 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Испанский">
+<link rel="apple-touch-icon" href="espanol-icon.png">
+<title>Испанский с нуля</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: one 560px column. A cobalt "azulejo" hero (the one bold move: tile pattern + big Spanish words),
+   unit rows that carry a tiny tile emblem, then quiet progress. Saffron marks streak, XP and the main button. */
+:root{
+  --bg:#EEF2FA; --surface:#FFFFFF; --ink:#12203F; --muted:#56608A; --hair:#CFD7EA; --cell:#DCE3F3;
+  --accent:#2347C8; --on-accent:#FFFFFF; --accent-text:#2347C8;
+  --sun:#FFB81C; --on-sun:#12203F;
+  --good:#1E8E5A; --good-bg:#DDF3E8; --bad:#C93B30; --bad-bg:#FBE1DE;
+  --tile-bg:#2347C8;
+  --tile:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.24' stroke-width='1.5'%3E%3Cpath d='M20 4c5 5 5 11 0 16-5-5-5-11 0-16zM36 20c-5 5-11 5-16 0 5-5 11-5 16 0zM20 36c-5-5-5-11 0-16 5 5 5 11 0 16zM4 20c5-5 11-5 16 0-5 5-11 5-16 0z'/%3E%3Ccircle cx='20' cy='20' r='2.4'/%3E%3Cpath stroke-opacity='.13' d='M0 0h40v40H0z'/%3E%3C/g%3E%3C/svg%3E");
+  --font-display:'Unbounded', 'Arial Black', system-ui, sans-serif;
+  --font-ui:'Onest', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1324; --surface:#161E36; --ink:#EAF0FF; --muted:#9AA7CC; --hair:#2A3558; --cell:#222C4A;
+    --accent:#8BA6FF; --on-accent:#0D1324; --accent-text:#9DB4FF;
+    --sun:#FFC94D; --on-sun:#1A1405;
+    --good:#5FD39A; --good-bg:#14352A; --bad:#FF8A7D; --bad-bg:#3B1A1A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1324; --surface:#161E36; --ink:#EAF0FF; --muted:#9AA7CC; --hair:#2A3558; --cell:#222C4A;
+  --accent:#8BA6FF; --on-accent:#0D1324; --accent-text:#9DB4FF;
+  --sun:#FFC94D; --on-sun:#1A1405;
+  --good:#5FD39A; --good-bg:#14352A; --bad:#FF8A7D; --bad-bg:#3B1A1A;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{
+  background:var(--bg); color:var(--ink); font:400 16px/1.5 var(--font-ui); -webkit-text-size-adjust:100%;
+  padding-block:18px 40px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent-text); outline-offset:2px}
+h1,h2,h3,p,dl,dd,ol,ul,figure{margin:0}
+.wrap,.play{max-width:560px; margin:0 auto}
+.wrap{display:flex; flex-direction:column; gap:18px}
+.azulejo{background-color:var(--tile-bg); background-image:var(--tile); background-size:40px 40px; color:#fff}
+
+/* header */
+.top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px 14px; flex-wrap:wrap}
+.eyebrow{font:700 12px var(--font-display); letter-spacing:.04em; color:var(--accent-text); margin-bottom:4px}
+h1{font:700 25px/1.15 var(--font-display); text-wrap:balance}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; font-size:13px; font-weight:500; font-variant-numeric:tabular-nums}
+.chip.sun{background:var(--sun); color:var(--on-sun)}
+.chip.rank{background:var(--surface); border:1px solid var(--hair)}
+
+/* hero */
+.hero{border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:10px;
+  background-image:linear-gradient(100deg, var(--tile-bg) 38%, rgba(35,71,200,0) 100%), var(--tile)}
+.hero h2{font:700 20px/1.2 var(--font-display)}
+.hero p{font-size:15px; color:#DCE5FF; max-width:30em}
+.hero .meta{font-size:14px; color:#fff}
+.cta{min-height:48px; padding:0 22px; border-radius:12px; border:0; border-bottom:3px solid rgba(0,0,0,.2); background:var(--sun); color:var(--on-sun); font:600 16px var(--font-ui); cursor:pointer}
+.cta:disabled{opacity:.5; cursor:default}
+.hero .cta{align-self:flex-start}
+
+/* goal */
+.goal-row{display:flex; justify-content:space-between; gap:12px; font-size:14px; color:var(--muted); margin-bottom:6px; font-variant-numeric:tabular-nums}
+.bar{height:8px; border-radius:4px; background:var(--cell); overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .3s}
+.goal.done .bar i{background:var(--good)}
+
+/* sections */
+h2.sec{font:700 18px/1.2 var(--font-display); margin-bottom:10px}
+.units{list-style:none; padding:0; display:flex; flex-direction:column; gap:10px}
+.unit{display:grid; grid-template-columns:72px 1fr; gap:12px; width:100%; text-align:left; border:1px solid var(--hair); border-bottom-width:3px; background:var(--surface); color:var(--ink); border-radius:14px; padding:10px; cursor:pointer; font:inherit}
+.emb{border-radius:10px; display:grid; place-items:center; font:700 12px/1.15 var(--font-display); text-align:center; padding:4px; overflow-wrap:anywhere; min-height:64px}
+.u-t{display:block; font-weight:600; font-size:16px}
+.u-s{display:block; font-size:13px; color:var(--muted); margin-top:2px}
+.u-m{display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.mini{flex:1; height:5px; border-radius:3px; background:var(--cell); overflow:hidden; min-width:40px}
+.mini i{display:block; height:100%; background:var(--accent)}
+
+details.lesson{border:1px solid var(--hair); border-radius:14px; background:var(--surface)}
+details.lesson summary{padding:14px 16px; font-weight:500; cursor:pointer; list-style:none; display:flex; justify-content:space-between; gap:12px}
+details.lesson summary::-webkit-details-marker{display:none}
+details.lesson summary::after{content:"+"; color:var(--muted); font-size:20px; line-height:1}
+details.lesson[open] summary::after{content:"–"}
+.lesson-body{padding:0 16px 16px; display:flex; flex-direction:column; gap:10px; font-size:15px}
+.lesson-body p{color:var(--muted)}
+.lesson-body dl{display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:14px}
+.lesson-body dt{font:700 14px var(--font-display); color:var(--accent-text); white-space:nowrap}
+.lesson-body dd{color:var(--ink)}
+
+.progress{display:flex; flex-direction:column; gap:12px; padding-top:18px; border-top:1px solid var(--hair)}
+h3{font:600 12px/1.3 var(--font-ui); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:8px}
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px 16px}
+.stats dt{font-size:13px; color:var(--muted)}
+.stats dd{font:700 24px/1.2 var(--font-display); font-variant-numeric:tabular-nums}
+.calh,.cal{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
+.calh span{font-size:11px; color:var(--muted); text-align:center}
+.cal i{aspect-ratio:1; border-radius:6px; background:var(--cell); display:grid; place-items:center; font:500 11px var(--font-ui); font-style:normal; color:var(--muted)}
+.cal i.part{background:color-mix(in srgb, var(--accent) 35%, var(--cell)); color:var(--ink)}
+.cal i.full{background:var(--accent); color:var(--on-accent)}
+.cal i.today{outline:2px solid var(--ink); outline-offset:1px}
+.cal i.future{opacity:.35}
+.cal-note,.foot{font-size:13px; color:var(--muted)}
+.seg{display:flex; gap:6px}
+.seg button,.btn{min-height:44px; border-radius:10px; border:1px solid var(--hair); background:var(--surface); color:var(--ink); font:500 15px var(--font-ui); cursor:pointer}
+.seg button{flex:1}
+.seg button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+.btn{padding:0 16px}
+.btn.quiet{background:transparent; border-color:transparent; color:var(--muted)}
+
+/* play */
+.play{display:flex; flex-direction:column; gap:16px; min-height:calc(100vh - 36px)}
+.p-top{display:flex; align-items:center; gap:12px}
+.x{width:44px; height:44px; flex:none; border-radius:12px; border:1px solid var(--hair); background:var(--surface); color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
+.p-bar{flex:1; height:10px; border-radius:5px; background:var(--cell); overflow:hidden}
+.p-bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .25s}
+.p-xp{font:600 13px var(--font-ui); color:var(--accent-text); min-width:60px; text-align:right; font-variant-numeric:tabular-nums}
+.p-stage{flex:1; display:flex; flex-direction:column; gap:14px}
+.q-label{font:600 12px var(--font-ui); letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.q-card{border-radius:16px; padding:22px 16px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;
+  background-image:radial-gradient(closest-side, var(--tile-bg) 55%, rgba(35,71,200,.15)), var(--tile)}
+.es{font:700 clamp(22px,7vw,34px)/1.2 var(--font-display); text-wrap:balance; overflow-wrap:anywhere}
+.tr{font-size:16px; color:#DCE5FF; letter-spacing:.02em}
+.q-card .ru-big{color:#fff}
+.ru-big{font:600 clamp(20px,6vw,28px)/1.25 var(--font-ui); text-wrap:balance; text-align:center}
+.note{font-size:14px; color:var(--muted); text-align:center}
+.spk{width:48px; height:48px; border-radius:50%; border:0; background:#fff; color:var(--tile-bg); cursor:pointer; display:grid; place-items:center}
+.spk.big{width:76px; height:76px}
+.spk svg{width:55%; height:55%}
+.opts{display:grid; gap:8px}
+.opt{display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1px; min-height:56px; padding:10px 14px; border:1.5px solid var(--hair); border-bottom-width:3px; background:var(--surface); color:var(--ink); border-radius:12px; font:500 17px var(--font-ui); text-align:left; cursor:pointer}
+.opt small{font-size:13px; color:var(--muted); font-weight:400}
+.opt.right{border-color:var(--good); background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad); background:var(--bad-bg)}
+.ans{min-height:68px; display:flex; flex-wrap:wrap; gap:8px; padding:10px 2px; border-top:2px dashed var(--hair); border-bottom:2px dashed var(--hair); align-content:flex-start}
+.bank{display:flex; flex-wrap:wrap; gap:8px; justify-content:center}
+.tile{min-height:44px; padding:0 14px; border-radius:10px; border:1.5px solid var(--hair); border-bottom-width:3px; background:var(--surface); color:var(--ink); font:500 17px var(--font-ui); cursor:pointer}
+.tile.ghost{visibility:hidden}
+.p-foot{position:sticky; bottom:8px; display:flex; flex-direction:column; gap:10px; align-items:stretch; padding:12px 14px; border-radius:14px; background:var(--surface); border:1.5px solid var(--hair); box-shadow:0 4px 18px rgba(18,32,63,.12)}
+.p-foot.good{background:var(--good-bg); border-color:var(--good)}
+.p-foot.bad{background:var(--bad-bg); border-color:var(--bad)}
+#pMsg,#rMsg{min-width:0; font-size:15px}
+#pMsg:empty,#rMsg:empty{display:none}
+#pMsg strong,#rMsg strong{display:block; font-size:17px}
+.p-foot.good #pMsg strong,.p-foot.good #rMsg strong{color:var(--good)}
+.p-foot.bad #pMsg strong,.p-foot.bad #rMsg strong{color:var(--bad)}
+#pMsg small,#rMsg small{display:block; color:var(--muted); margin-top:2px}
+.p-foot .cta{background:var(--accent); color:var(--on-accent); min-width:130px}
+.p-foot.good .cta{background:var(--good); color:#fff}
+.p-foot.bad .cta{background:var(--bad); color:#fff}
+.sum{border-radius:18px; padding:24px 18px; text-align:center; display:flex; flex-direction:column; gap:6px;
+  background-image:radial-gradient(closest-side, var(--tile-bg) 55%, rgba(35,71,200,.15)), var(--tile)}
+.sum h2{font:700 24px/1.2 var(--font-display)}
+.sum p{color:#DCE5FF}
+.sum .big{font:700 40px/1.1 var(--font-display); color:var(--sun)}
+.sum-list{display:flex; flex-direction:column; gap:8px; font-size:15px}
+.sum-list div{display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid var(--hair); padding-bottom:6px}
+.sum-list span{color:var(--muted)}
+.sum-act{display:flex; flex-direction:column; gap:8px}
+.sum-act .cta{background:var(--accent); color:var(--on-accent)}
+
+/* reader */
+.r-title{flex:1; min-width:0; font:700 18px/1.2 var(--font-display)}
+.spk.sm{width:40px; height:40px; background:var(--accent); color:var(--on-accent)}
+.rw{display:grid; grid-template-columns:40px 1fr; gap:2px 10px; align-items:center; padding:8px 0; border-top:1px solid var(--hair)}
+.rw.nos{grid-template-columns:1fr}
+.rw .spk{grid-row:1 / span 2}
+.rw-t{display:flex; flex-wrap:wrap; gap:0 10px; align-items:baseline}
+.rw-es{font:700 17px var(--font-display)}
+.rw-tr{font-size:14px; color:var(--accent-text)}
+.rw-ru{font-size:14px; color:var(--muted); grid-column:2}
+.rw.nos .rw-ru{grid-column:1}
+.rw-ru small{display:block; font-size:13px; color:var(--ink); margin-top:1px}
+.rd-stack{display:flex; flex-direction:column; gap:10px}
+.rd-card{border:1px solid var(--hair); border-radius:14px; background:var(--surface); padding:16px; display:flex; flex-direction:column; gap:10px}
+.rd-card .cta{background:var(--accent); color:var(--on-accent); align-self:flex-start}
+.tx-ctl{display:flex; flex-wrap:wrap; gap:8px}
+.tg[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+.lines{display:flex; flex-direction:column; gap:10px}
+.ln{display:grid; grid-template-columns:40px 1fr; gap:10px; align-items:start; padding:12px; border:1px solid var(--hair); border-radius:14px; background:var(--surface)}
+.ln.nos{grid-template-columns:1fr}
+.ln-b{display:block; text-align:left; background:none; border:0; padding:0; color:inherit; font:inherit; cursor:pointer; min-height:40px}
+.l-es{display:block; font:600 18px/1.35 var(--font-display); overflow-wrap:anywhere}
+.l-tr{display:block; font-size:14px; color:var(--accent-text); margin-top:3px}
+.l-ru{display:none; font-size:15px; color:var(--muted); margin-top:6px}
+.lines[data-tr="0"] .l-tr{display:none}
+.lines[data-ru="1"] .l-ru,.ln.open .l-ru{display:block}
+.q-title{font:600 17px/1.3 var(--font-ui)}
+.res{border-radius:18px; padding:24px 18px; text-align:center; display:flex; flex-direction:column; gap:6px;
+  background-image:radial-gradient(closest-side, var(--tile-bg) 55%, rgba(35,71,200,.15)), var(--tile)}
+.res h2{font:700 24px/1.2 var(--font-display)}
+.res .big{font:700 40px/1.1 var(--font-display); color:var(--sun)}
+.res p{color:#DCE5FF}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+@media (max-width:380px){ h1{font-size:21px} }
+</style>
+
+<div class="wrap" id="home">
+  <header class="top">
+    <div>
+      <div class="eyebrow">¡Hola!</div>
+      <h1>Испанский с нуля</h1>
+    </div>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <section class="hero azulejo" id="hero" aria-label="Тренировка дня"></section>
+
+
+  <section class="goal" id="goal" aria-label="Цель на сегодня">
+    <div class="goal-row"><span>Сегодня</span><span id="goalTxt"></span></div>
+    <div class="bar" id="bar" role="progressbar" aria-label="Ответов сегодня" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><i id="barFill"></i></div>
+  </section>
+
+  <section aria-labelledby="readH">
+    <h2 class="sec" id="readH">Читаем</h2>
+    <ul class="units" id="readList"></ul>
+  </section>
+
+  <section aria-labelledby="unitsH">
+    <h2 class="sec" id="unitsH">Темы</h2>
+    <ul class="units" id="units"></ul>
+  </section>
+
+  <section class="progress" aria-labelledby="progH">
+    <h2 class="sec" id="progH" style="margin:0">Мой прогресс</h2>
+    <dl class="stats" id="stats"></dl>
+    <div id="rankBox"></div>
+    <h3>Последние четыре недели</h3>
+    <div id="cal" role="img" aria-label="Календарь занятий за четыре недели"></div>
+    <p class="cal-note">Яркая клетка: цель дня выполнена. Бледная: занятия были, но цель не добрана.</p>
+    <h3>Ответов в день</h3>
+    <div class="seg" id="goalSeg" role="group" aria-label="Цель на день"></div>
+    <h3>Озвучка</h3>
+    <button type="button" class="btn" id="soundBtn" aria-pressed="true">Автоозвучка включена</button>
+    <p class="cal-note">Слова произносит голос твоего телефона или компьютера. Автоозвучка произносит слово сама, а кнопка с динамиком работает всегда. Если звука нет, проверь громкость и режим «Без звука».</p>
+  </section>
+
+  <p class="foot" id="saveNote"></p>
+</div>
+
+<section class="play" id="play" hidden aria-label="Тренировка">
+  <div class="p-top">
+    <button type="button" class="x" id="pExit" aria-label="Выйти из тренировки">×</button>
+    <div class="p-bar" role="progressbar" aria-label="Прогресс тренировки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="pBar"><i id="pFill"></i></div>
+    <div class="p-xp" id="pXp">+0 XP</div>
+  </div>
+  <div class="p-stage" id="pStage"></div>
+  <div class="p-foot" id="pFoot" hidden role="status" aria-live="polite">
+    <div id="pMsg"></div>
+    <button type="button" class="cta" id="pNext">Дальше</button>
+  </div>
+</section>
+
+<section class="play" id="read" hidden aria-label="Читаем">
+  <div class="p-top">
+    <button type="button" class="x" id="rBack" aria-label="Назад">←</button>
+    <div class="r-title" id="rTitle"></div>
+  </div>
+  <div class="p-stage" id="rStage"></div>
+  <div class="p-foot" id="rFoot" hidden role="status" aria-live="polite">
+    <div id="rMsg"></div>
+    <button type="button" class="cta" id="rNext">Дальше</button>
+  </div>
+</section>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- content: [spanish, transcription, russian, optional note] ---------- */
+const UNITS = [
+  {id:'hi', emb:'Hola', title:'Привет и пока', sub:'Первые слова, которые пригодятся в любой поездке.', items:[
+    ['Hola','О-ла','Привет','Буква h не читается.'],
+    ['Buenos días','БУЭ-нос ДИ-ас','Доброе утро','Так здороваются до обеда.'],
+    ['Buenas tardes','БУЭ-нас ТАР-дес','Добрый день','Так здороваются после обеда и до вечера.'],
+    ['Buenas noches','БУЭ-нас НО-чес','Добрый вечер','Так же говорят перед сном: «спокойной ночи».'],
+    ['Adiós','а-ДЬОС','До свидания'],
+    ['Hasta luego','АС-та ЛУЭ-го','До скорого'],
+    ['Hasta mañana','АС-та ма-НЬЯ-на','До завтра','ñ читается как «нь».'],
+    ['Por favor','пор фа-БОР','Пожалуйста','Когда о чём-то просишь. Буква v читается как «б».'],
+    ['Gracias','ГРА-сьяс','Спасибо'],
+    ['De nada','де НА-да','Не за что'],
+    ['Perdón','пер-ДОН','Извините']
+  ]},
+  {id:'me', emb:'Me llamo', title:'Знакомство', sub:'Представиться, спросить «как дела?» и сказать «не понимаю».', items:[
+    ['¿Cómo te llamas?','КО-мо те ЙЯ-мас','Как тебя зовут?','Дословно: «как ты называешься?». ll читается как «й».'],
+    ['Me llamo Ana','ме ЙЯ-мо А-на','Меня зовут Ана','Вместо Ана подставь своё имя.'],
+    ['Mucho gusto','МУ-чо ГУС-то','Очень приятно'],
+    ['¿Cómo estás?','КО-мо эс-ТАС','Как дела?'],
+    ['Estoy bien','эс-ТОЙ БЬЕН','У меня всё хорошо'],
+    ['¿Y tú?','и ТУ','А ты?'],
+    ['Soy de Rusia','сой де РУ-сья','Я из России'],
+    ['Sí','СИ','Да'],
+    ['No','НО','Нет'],
+    ['No entiendo','но эн-ТЬЕН-до','Я не понимаю'],
+    ['¿Hablas inglés?','А-блас ин-ГЛЕС','Ты говоришь по-английски?']
+  ]},
+  {id:'n', emb:'1 2 3', title:'Числа от 1 до 10', sub:'Считаем: пригодится в магазине, на рынке и в такси.', items:[
+    ['uno','У-но','один'],
+    ['dos','ДОС','два'],
+    ['tres','ТРЕС','три'],
+    ['cuatro','КУА-тро','четыре'],
+    ['cinco','СИН-ко','пять'],
+    ['seis','СЕЙС','шесть'],
+    ['siete','СЬЕ-те','семь'],
+    ['ocho','О-чо','восемь'],
+    ['nueve','НУЭ-бе','девять'],
+    ['diez','ДЬЕС','десять']
+  ]},
+  {id:'food', emb:'agua', title:'Еда и напитки', sub:'Что заказать, чтобы не остаться без обеда.', items:[
+    ['agua','А-гуа','вода'],
+    ['café','ка-ФЕ','кофе','Ударение на последний слог: знак ´ его показывает.'],
+    ['té','ТЕ','чай'],
+    ['leche','ЛЕ-че','молоко'],
+    ['pan','ПАН','хлеб'],
+    ['queso','КЕ-со','сыр','qu читается как «к», u не читается.'],
+    ['manzana','ман-СА-на','яблоко'],
+    ['cerveza','сер-БЕ-са','пиво'],
+    ['vino','БИ-но','вино'],
+    ['huevo','УЭ-бо','яйцо','h не читается.']
+  ]},
+  {id:'cafe', emb:'un café', title:'В кафе и магазине', sub:'Заказать, спросить цену, сказать, что хочется есть.', items:[
+    ['Quiero un café','КЬЕ-ро ун ка-ФЕ','Я хочу кофе'],
+    ['Un agua, por favor','ун А-гуа пор фа-БОР','Воду, пожалуйста'],
+    ['La cuenta, por favor','ла КУЭН-та пор фа-БОР','Счёт, пожалуйста'],
+    ['¿Cuánto cuesta?','КУАН-то КУЭС-та','Сколько стоит?'],
+    ['Tengo hambre','ТЕН-го АМ-бре','Я хочу есть'],
+    ['Tengo sed','ТЕН-го СЕД','Я хочу пить'],
+    ['Está rico','эс-ТА РРИ-ко','Вкусно','Раскатистое «рр» в начале слова.'],
+    ['Para llevar','ПА-ра йе-БАР','С собой'],
+    ['Sin hielo','син ЙЕ-ло','Без льда'],
+    ['Con leche','кон ЛЕ-че','С молоком']
+  ]},
+  {id:'ppl', emb:'amigo', title:'Люди', sub:'Я, ты, он, она и близкие.', items:[
+    ['yo','ЙО','я'],
+    ['tú','ТУ','ты'],
+    ['él','ЭЛЬ','он'],
+    ['ella','Э-йа','она'],
+    ['nosotros','но-СО-трос','мы'],
+    ['mamá','ма-МА','мама'],
+    ['papá','па-ПА','папа'],
+    ['amigo','а-МИ-го','друг'],
+    ['amiga','а-МИ-га','подруга'],
+    ['hombre','ОМ-бре','мужчина'],
+    ['mujer','му-ХЕР','женщина','j читается как «х».']
+  ]},
+  {id:'col', emb:'rojo', title:'Цвета', sub:'Красный, синий, зелёный и все остальные.', items:[
+    ['rojo','РРО-хо','красный'],
+    ['azul','а-СУЛ','синий'],
+    ['verde','БЕР-де','зелёный'],
+    ['amarillo','а-ма-РИ-йо','жёлтый'],
+    ['blanco','БЛАН-ко','белый'],
+    ['negro','НЕ-гро','чёрный'],
+    ['naranja','на-РАН-ха','оранжевый'],
+    ['rosa','РРО-са','розовый'],
+    ['gris','ГРИС','серый'],
+    ['marrón','ма-РРОН','коричневый']
+  ]},
+  {id:'go', emb:'¿Dónde?', title:'В дороге', sub:'Найти туалет, вокзал и дорогу.', items:[
+    ['¿Dónde está el baño?','ДОН-де эс-ТА эль БА-ньо','Где туалет?'],
+    ['el hotel','эль о-ТЕЛ','отель'],
+    ['el aeropuerto','эль а-э-ро-ПУЭР-то','аэропорт'],
+    ['la estación','ла эс-та-СЬОН','вокзал'],
+    ['a la derecha','а ла де-РЕ-ча','направо'],
+    ['a la izquierda','а ла ис-КЬЕР-да','налево'],
+    ['todo recto','ТО-до РРЕК-то','прямо','В Латинской Америке часто говорят «todo derecho».'],
+    ['cerca','СЕР-ка','близко'],
+    ['lejos','ЛЕ-хос','далеко'],
+    ['¡Ayuda!','а-ЙУ-да','Помогите!'],
+    ['el taxi','эль ТАК-си','такси']
+  ]},
+  {id:'day', emb:'lunes', title:'Дни недели', sub:'Какой сегодня день и что будет завтра.', items:[
+    ['lunes','ЛУ-нес','понедельник','Дни недели и месяцы в испанском пишутся с маленькой буквы.'],
+    ['martes','МАР-тес','вторник'],
+    ['miércoles','МЬЕР-ко-лес','среда'],
+    ['jueves','ХУЭ-бес','четверг','j читается как «х».'],
+    ['viernes','БЬЕР-нес','пятница'],
+    ['sábado','СА-ба-до','суббота'],
+    ['domingo','до-МИН-го','воскресенье'],
+    ['hoy','ОЙ','сегодня','h не читается.'],
+    ['mañana','ма-НЬЯ-на','завтра','Это же слово значит «утро».'],
+    ['ayer','а-ЙЕР','вчера'],
+    ['¿Qué día es hoy?','ке ДИ-а эс ОЙ','Какой сегодня день?']
+  ]},
+  {id:'mon', emb:'enero', title:'Месяцы', sub:'От января до декабря.', items:[
+    ['enero','э-НЕ-ро','январь'],
+    ['febrero','фе-БРЕ-ро','февраль'],
+    ['marzo','МАР-со','март','z читается как «с».'],
+    ['abril','а-БРИЛЬ','апрель'],
+    ['mayo','МА-йо','май'],
+    ['junio','ХУ-нио','июнь'],
+    ['julio','ХУ-лио','июль'],
+    ['agosto','а-ГОС-то','август'],
+    ['septiembre','сеп-ТЬЕМ-бре','сентябрь'],
+    ['octubre','ок-ТУ-бре','октябрь'],
+    ['noviembre','но-БЬЕМ-бре','ноябрь'],
+    ['diciembre','ди-СЬЕМ-бре','декабрь']
+  ]},
+  {id:'fam', emb:'familia', title:'Семья', sub:'Мама, папа, братья, сёстры и все родные.', items:[
+    ['la familia','ла фа-МИ-лья','семья'],
+    ['los padres','лос ПА-дрес','родители'],
+    ['el padre','эль ПА-дре','отец'],
+    ['la madre','ла МА-дре','мать'],
+    ['el hermano','эль эр-МА-но','брат','h не читается.'],
+    ['la hermana','ла эр-МА-на','сестра'],
+    ['el hijo','эль И-хо','сын'],
+    ['la hija','ла И-ха','дочь'],
+    ['el abuelo','эль а-БУЭ-ло','дедушка'],
+    ['la abuela','ла а-БУЭ-ла','бабушка'],
+    ['el esposo','эль эс-ПО-со','муж'],
+    ['la esposa','ла эс-ПО-са','жена'],
+    ['el niño','эль НИ-ньо','мальчик'],
+    ['la niña','ла НИ-нья','девочка']
+  ]},
+  {id:'shop', emb:'tienda', title:'Покупки', sub:'В магазине и на рынке: сколько стоит и что нравится.', items:[
+    ['la tienda','ла ТЬЕН-да','магазин'],
+    ['el mercado','эль мер-КА-до','рынок'],
+    ['el dinero','эль ди-НЕ-ро','деньги'],
+    ['barato','ба-РА-то','дешёвый'],
+    ['caro','КА-ро','дорогой'],
+    ['grande','ГРАН-де','большой'],
+    ['pequeño','пе-КЕ-ньо','маленький'],
+    ['Quiero esto','КЬЕ-ро ЭС-то','Я хочу это'],
+    ['Me gusta','ме ГУС-та','Мне нравится','g перед u читается как «г»: ГУС-та.'],
+    ['No me gusta','но ме ГУС-та','Мне не нравится'],
+    ['Solo estoy mirando','СО-ло эс-ТОЙ ми-РАН-до','Я просто смотрю'],
+    ['¿Puedo pagar con tarjeta?','ПУЭ-до па-ГАР кон тар-ХЕ-та','Можно заплатить картой?']
+  ]},
+  {id:'verb', emb:'ser · ir', title:'Главные глаголы', sub:'Двенадцать глаголов, на которых держится разговор.', items:[
+    ['ser','СЕР','быть (кем-то, каким-то)','Для постоянного: имя, национальность, профессия.'],
+    ['estar','эс-ТАР','быть (где-то, в каком-то состоянии)','Для места и состояния: «я дома», «мне хорошо».'],
+    ['tener','те-НЕР','иметь'],
+    ['ir','ИР','идти, ехать'],
+    ['querer','ке-РЕР','хотеть','qu читается как «к».'],
+    ['hablar','а-БЛАР','говорить','h не читается.'],
+    ['comer','ко-МЕР','есть, кушать'],
+    ['beber','бе-БЕР','пить'],
+    ['vivir','би-БИР','жить'],
+    ['hacer','а-СЕР','делать'],
+    ['poder','по-ДЕР','мочь'],
+    ['saber','са-БЕР','знать']
+  ]},
+  {id:'act', emb:'Voy a…', title:'Фразы с глаголами', sub:'Готовые фразы: где живёшь, что умеешь, что любишь.', items:[
+    ['Hablo un poco de español','А-бло ун ПО-ко де эс-па-НЬОЛЬ','Я немного говорю по-испански'],
+    ['Entiendo','эн-ТЬЕН-до','Я понимаю'],
+    ['No sé','но СЕ','Я не знаю'],
+    ['Vivo en Rusia','БИ-бо эн РУ-сья','Я живу в России'],
+    ['Estoy en casa','эс-ТОЙ эн КА-са','Я дома'],
+    ['Estoy aquí','эс-ТОЙ а-КИ','Я здесь','qu в слове aquí читается как «к».'],
+    ['Voy al hotel','БОЙ аль о-ТЕЛЬ','Я иду в отель','al — это a + el: предлог «в» слился с артиклем.'],
+    ['Tengo un perro','ТЕН-го ун ПЕ-рро','У меня есть собака'],
+    ['Quiero beber agua','КЬЕ-ро бе-БЕР А-гуа','Я хочу выпить воды'],
+    ['Me gusta viajar','ме ГУС-та бья-ХАР','Мне нравится путешествовать'],
+    ['¿Puedes ayudarme?','ПУЭ-дес а-йу-ДАР-ме','Можешь мне помочь?']
+  ]},
+  {id:'que', emb:'¿Qué?', title:'Вопросы', sub:'Что, где, когда, почему: чтобы спрашивать самой.', items:[
+    ['¿Qué?','КЕ','Что?'],
+    ['¿Quién?','КЬЕН','Кто?'],
+    ['¿Dónde?','ДОН-де','Где?'],
+    ['¿Cuándo?','КУАН-до','Когда?'],
+    ['¿Cómo?','КО-мо','Как?'],
+    ['¿Por qué?','пор КЕ','Почему?','«Потому что» будет porque: одним словом.'],
+    ['¿Cuánto?','КУАН-то','Сколько?'],
+    ['¿Cuál?','КУАЛЬ','Какой?'],
+    ['¿Qué es esto?','ке ЭС ЭС-то','Что это?'],
+    ['¿Qué hora es?','ке О-ра ЭС','Который час?'],
+    ['¿Qué significa?','ке сиг-ни-ФИ-ка','Что значит?'],
+    ['¿Puedes repetir?','ПУЭ-дес ре-пе-ТИР','Можешь повторить?'],
+    ['Más despacio, por favor','МАС дес-ПА-сьо пор фа-БОР','Помедленнее, пожалуйста']
+  ]},
+  {id:'n2', emb:'11–100', title:'Числа до ста', sub:'Ноль, второй десяток, десятки и тысяча.', items:[
+    ['cero','СЕ-ро','ноль'],
+    ['once','ОН-се','одиннадцать'],
+    ['doce','ДО-се','двенадцать'],
+    ['trece','ТРЕ-се','тринадцать'],
+    ['catorce','ка-ТОР-се','четырнадцать'],
+    ['quince','КИН-се','пятнадцать','qu читается как «к»: КИН-се.'],
+    ['veinte','БЕЙН-те','двадцать'],
+    ['treinta','ТРЕЙН-та','тридцать'],
+    ['cuarenta','куа-РЕН-та','сорок'],
+    ['cincuenta','син-КУЭН-та','пятьдесят'],
+    ['cien','СЬЕН','сто'],
+    ['mil','МИЛЬ','тысяча']
+  ]},
+  {id:'wea', emb:'sol', title:'Погода', sub:'Жарко, холодно, идёт дождь: поддержать разговор ни о чём.', items:[
+    ['¿Qué tiempo hace?','ке ТЬЕМ-по А-се','Какая погода?','Дословно: «какую погоду делает?».'],
+    ['Hace buen tiempo','А-се БУЭН ТЬЕМ-по','Хорошая погода'],
+    ['Hace sol','А-се СОЛЬ','Солнечно'],
+    ['Hace calor','А-се ка-ЛОР','Жарко'],
+    ['Hace frío','А-се ФРИ-о','Холодно'],
+    ['Llueve','ЙУЭ-бе','Идёт дождь'],
+    ['Nieva','НЬЕ-ба','Идёт снег'],
+    ['la lluvia','ла ЙУ-бья','дождь'],
+    ['el viento','эль БЬЕН-то','ветер']
+  ]},
+  {id:'home', emb:'casa', title:'Дом и вещи', sub:'Что есть в комнате и в чемодане.', items:[
+    ['la casa','ла КА-са','дом'],
+    ['la habitación','ла а-би-та-СЬОН','комната','h не читается.'],
+    ['la cama','ла КА-ма','кровать'],
+    ['la mesa','ла МЕ-са','стол'],
+    ['la silla','ла СИ-йа','стул'],
+    ['la puerta','ла ПУЭР-та','дверь'],
+    ['la ventana','ла бен-ТА-на','окно'],
+    ['la llave','ла ЙА-бе','ключ'],
+    ['el teléfono','эль те-ЛЕ-фо-но','телефон'],
+    ['la maleta','ла ма-ЛЕ-та','чемодан']
+  ]}
+];
+const ITEMS = [], BY = {};
+UNITS.forEach(u => u.items.forEach((r, i) => {
+  const it = {id:u.id + (i + 1), u:u.id, es:r[0], tr:r[1], ru:r[2], note:r[3] || '', toks:r[0].split(' ').length};
+  ITEMS.push(it); BY[it.id] = it;
+}));
+
+/* ---------- reading rules: rows are [spanish, transcription, russian, note?, label?] ---------- */
+const RULES = [
+  {id:'vow', title:'Гласные', intro:'В испанском пять гласных, и каждая звучит всегда одинаково. Безударные не «глотай», как в русском: a остаётся «а», o остаётся «о», e остаётся «э».', rows:[
+    ['ala','А-ла','крыло'],
+    ['mesa','МЕ-са','стол'],
+    ['isla','ИС-ла','остров'],
+    ['oso','О-со','медведь'],
+    ['uno','У-но','один'],
+    ['mapa','МА-па','карта']
+  ]},
+  {id:'dip', title:'Две гласные рядом', intro:'Гласные a, e, o сильные, i и u слабые. Слабая рядом с сильной сливается с ней в один слог: bien читается «бьен», а не «би-ен». Знак ´ на i или u разрывает слог.', rows:[
+    ['bien','БЬЕН','хорошо'],
+    ['tiempo','ТЬЕМ-по','время'],
+    ['cuatro','КУА-тро','четыре'],
+    ['nueve','НУЭ-бе','девять'],
+    ['aire','АЙ-ре','воздух'],
+    ['hoy','ОЙ','сегодня'],
+    ['auto','АУ-то','машина'],
+    ['Europa','эу-РО-па','Европа'],
+    ['día','ДИ-а','день','Знак ´ на í: слоги не сливаются, ДИ-а, а не «дья».'],
+    ['país','па-ИС','страна'],
+    ['río','РРИ-о','река']
+  ]},
+  {id:'mute', title:'Буквы, которые молчат', intro:'h не читается никогда. В сочетаниях que, qui, gue, gui буква u тоже молчит: она нужна только для того, чтобы «к» и «г» остались твёрдыми. Если u всё-таки надо прочитать, над ней ставят две точки: ü.', rows:[
+    ['hola','О-ла','привет'],
+    ['hotel','о-ТЕЛЬ','отель'],
+    ['hermano','эр-МА-но','брат'],
+    ['queso','КЕ-со','сыр'],
+    ['quince','КИН-се','пятнадцать'],
+    ['guerra','ГЕ-рра','война'],
+    ['guitarra','ги-ТА-рра','гитара'],
+    ['pingüino','пин-ГУИ-но','пингвин','Две точки над ü: u читается.']
+  ]},
+  {id:'cg', title:'C, G и Z', intro:'Перед a, o, u: c читается как «к», g как «г». Перед e и i: c читается как «с», g как «х». Буква z всегда «с» (так говорят в Латинской Америке).', rows:[
+    ['casa','КА-са','дом'],
+    ['coche','КО-че','машина'],
+    ['cena','СЕ-на','ужин'],
+    ['cine','СИ-не','кино'],
+    ['gato','ГА-то','кот'],
+    ['gusto','ГУС-то','вкус'],
+    ['gente','ХЕН-те','люди'],
+    ['gigante','хи-ГАН-те','великан'],
+    ['zapato','са-ПА-то','туфля'],
+    ['zona','СО-на','зона']
+  ]},
+  {id:'spec', title:'J, Ñ, LL, Y, CH', intro:'j всегда «х». ñ это мягкое «нь». ll и y читаются как «й» (в разных странах чуть по-разному, но «й» поймут везде). ch это «ч». Отдельное слово y значит «и».', rows:[
+    ['jamón','ха-МОН','ветчина'],
+    ['año','А-ньо','год'],
+    ['niño','НИ-ньо','мальчик'],
+    ['calle','КА-йе','улица'],
+    ['lluvia','ЙУ-бья','дождь'],
+    ['yo','ЙО','я'],
+    ['chico','ЧИ-ко','парень'],
+    ['noche','НО-че','ночь']
+  ]},
+  {id:'bvr', title:'B, V, D, R, X', intro:'b и v звучат одинаково, как русская «б». d между гласными мягче русской «д». r в начале слова и rr раскатистые, а одна r между гласными короткая.', rows:[
+    ['boca','БО-ка','рот'],
+    ['vaca','БА-ка','корова'],
+    ['nada','НА-да','ничего'],
+    ['rosa','РРО-са','роза'],
+    ['perro','ПЕ-рро','собака','rr раскатистое.'],
+    ['pero','ПЕ-ро','но','Одна r короткая. Не путай с perro!'],
+    ['ahora','а-О-ра','сейчас'],
+    ['taxi','ТАК-си','такси'],
+    ['México','МЕ-хи-ко','Мексика','В названии страны x читается как «х».']
+  ]},
+  {id:'str', title:'Где ударение', intro:'Слово кончается на гласную, n или s: ударный предпоследний слог. Кончается на другую согласную: ударный последний. Если ударение «не по правилу», над гласной ставят знак ´, и он показывает ударный слог.', rows:[
+    ['casa','КА-са','дом'],
+    ['hablan','А-блан','говорят'],
+    ['lunes','ЛУ-нес','понедельник'],
+    ['hotel','о-ТЕЛЬ','отель'],
+    ['ciudad','сью-ДАД','город'],
+    ['hablar','а-БЛАР','говорить'],
+    ['café','ка-ФЕ','кофе','Кончается на гласную, но ударение на последнем: есть ´.'],
+    ['teléfono','те-ЛЕ-фо-но','телефон'],
+    ['inglés','ин-ГЛЕС','английский'],
+    ['árbol','АР-боль','дерево','Кончается на l, но ударение на первом: есть ´.'],
+    ['también','там-БЬЕН','тоже']
+  ]},
+  {id:'mark', title:'Знаки ¿ ¡ и ´', intro:'Вопрос и восклицание открываются перевёрнутым знаком, чтобы ты сразу понимала интонацию. Вопросительные слова пишут со знаком ´: qué, cómo, dónde. Без знака это другие слова: que значит «что» в середине фразы.', rows:[
+    ['¿Qué es?','ке ЭС','Что это?'],
+    ['¿Cómo estás?','КО-мо эс-ТАС','Как дела?'],
+    ['¿Dónde vives?','ДОН-де БИ-бес','Где ты живёшь?'],
+    ['¡Qué bien!','ке БЬЕН','Как хорошо!'],
+    ['¡Qué rico!','ке РРИ-ко','Как вкусно!'],
+    ['¿Cuánto cuesta?','КУАН-то КУЭС-та','Сколько стоит?']
+  ]},
+  {id:'abc', title:'Алфавит', intro:'В испанском 27 букв. Названия букв пригодятся, когда нужно продиктовать своё имя по буквам.', rows:[
+    ['a','А','как в Ana',,'A a'],
+    ['be','БЕ','как в bien',,'B b'],
+    ['ce','СЕ','как в casa',,'C c'],
+    ['de','ДЕ','как в día',,'D d'],
+    ['e','Э','как в esto',,'E e'],
+    ['efe','Э-фе','как в familia',,'F f'],
+    ['ge','ХЕ','как в gato',,'G g'],
+    ['hache','А-че','как в hola',,'H h'],
+    ['i','И','как в isla',,'I i'],
+    ['jota','ХО-та','как в jamón',,'J j'],
+    ['ka','КА','как в kilo',,'K k'],
+    ['ele','Э-ле','как в luna',,'L l'],
+    ['eme','Э-ме','как в mesa',,'M m'],
+    ['ene','Э-не','как в nada',,'N n'],
+    ['eñe','Э-нье','как в año',,'Ñ ñ'],
+    ['o','О','как в oso',,'O o'],
+    ['pe','ПЕ','как в pan',,'P p'],
+    ['cu','КУ','как в queso',,'Q q'],
+    ['erre','Э-рре','как в rosa',,'R r'],
+    ['ese','Э-се','как в sol',,'S s'],
+    ['te','ТЕ','как в té',,'T t'],
+    ['u','У','как в uno',,'U u'],
+    ['uve','У-бе','как в vino',,'V v'],
+    ['uve doble','У-бе ДО-бле','как в whisky',,'W w'],
+    ['equis','Э-кис','как в taxi',,'X x'],
+    ['ye','ЙЕ','как в yo',,'Y y'],
+    ['zeta','СЕ-та','как в zapato',,'Z z']
+  ]}
+];
+
+/* ---------- texts to read: lines are [spanish, transcription, russian]; q = [question, options, right index] ---------- */
+const TEXTS = [
+  {id:'cafe', emb:'Café', title:'В кафе', sub:'Диалог: заказать кофе и расплатиться.', lines:[
+    ['— Buenos días.','БУЭ-нос ДИ-ас','— Доброе утро.'],
+    ['— Buenos días. ¿Qué quieres?','БУЭ-нос ДИ-ас. ке КЬЕ-рес','— Доброе утро. Что будешь?'],
+    ['— Un café con leche, por favor.','ун ка-ФЕ кон ЛЕ-че, пор фа-БОР','— Кофе с молоком, пожалуйста.'],
+    ['— Aquí tienes.','а-КИ ТЬЕ-нес','— Вот, держи.'],
+    ['— Gracias. ¿Cuánto cuesta?','ГРА-сьяс. КУАН-то КУЭС-та','— Спасибо. Сколько стоит?'],
+    ['— Dos euros.','ДОС ЭУ-рос','— Два евро.'],
+    ['— Aquí tienes. Adiós.','а-КИ ТЬЕ-нес. а-ДЬОС','— Вот, держи. До свидания.'],
+    ['— Hasta luego.','АС-та ЛУЭ-го','— До скорого.']
+  ], q:['Сколько стоит кофе?', ['Один евро','Два евро','Три евро','Пять евро'], 1]},
+  {id:'meet', emb:'Hola', title:'Знакомство', sub:'Диалог: два человека знакомятся.', lines:[
+    ['— Hola, me llamo Ana. ¿Cómo te llamas?','О-ла, ме ЙЯ-мо А-на. КО-мо те ЙЯ-мас','— Привет, меня зовут Ана. А тебя как зовут?'],
+    ['— Me llamo Carlos. Mucho gusto.','ме ЙЯ-мо КАР-лос. МУ-чо ГУС-то','— Меня зовут Карлос. Очень приятно.'],
+    ['— Mucho gusto. ¿De dónde eres?','МУ-чо ГУС-то. де ДОН-де Э-рес','— Очень приятно. Откуда ты?'],
+    ['— Soy de México. ¿Y tú?','сой де МЕ-хи-ко. и ТУ','— Я из Мексики. А ты?'],
+    ['— Soy de Rusia.','сой де РУ-сья','— Я из России.'],
+    ['— ¿Hablas español?','А-блас эс-па-НЬОЛЬ','— Ты говоришь по-испански?'],
+    ['— Un poco. Estoy aprendiendo.','ун ПО-ко. эс-ТОЙ а-прен-ДЬЕН-до','— Немного. Я учусь.'],
+    ['— ¡Muy bien!','МУЙ БЬЕН','— Очень хорошо!']
+  ], q:['Откуда Карлос?', ['Из России','Из Мексики','Из Испании','Из Москвы'], 1]},
+  {id:'fam', emb:'Familia', title:'Моя семья', sub:'Рассказ: кто есть в семье и сколько им лет.', lines:[
+    ['Me llamo Ana.','ме ЙЯ-мо А-на','Меня зовут Ана.'],
+    ['Tengo una familia pequeña.','ТЕН-го У-на фа-МИ-лья пе-КЕ-нья','У меня маленькая семья.'],
+    ['Tengo un hermano y una hermana.','ТЕН-го ун эр-МА-но и У-на эр-МА-на','У меня есть брат и сестра.'],
+    ['Mi madre se llama Rosa.','ми МА-дре се ЙЯ-ма РРО-са','Мою маму зовут Роса.'],
+    ['Mi padre se llama Luis.','ми ПА-дре се ЙЯ-ма ЛУИС','Моего папу зовут Луис.'],
+    ['Mi hermano tiene diez años.','ми эр-МА-но ТЬЕ-не ДЬЕС А-ньос','Моему брату десять лет.'],
+    ['Mi hermana tiene seis años.','ми эр-МА-на ТЬЕ-не СЕЙС А-ньос','Моей сестре шесть лет.'],
+    ['Me gusta mi familia.','ме ГУС-та ми фа-МИ-лья','Мне нравится моя семья.']
+  ], q:['Сколько лет брату?', ['Шесть','Десять','Два','Пятнадцать'], 1]},
+  {id:'day', emb:'Hoy', title:'Мой день', sub:'Рассказ: что делаешь утром, днём и вечером.', lines:[
+    ['Hoy es sábado.','ОЙ эс СА-ба-до','Сегодня суббота.'],
+    ['Por la mañana bebo café.','пор ла ма-НЬЯ-на БЕ-бо ка-ФЕ','Утром я пью кофе.'],
+    ['Como pan con queso.','КО-мо ПАН кон КЕ-со','Я ем хлеб с сыром.'],
+    ['Después voy a la tienda.','дес-ПУЭС бой а ла ТЬЕН-да','Потом я иду в магазин.'],
+    ['Compro agua y manzanas.','КОМ-про А-гуа и ман-СА-нас','Я покупаю воду и яблоки.'],
+    ['Por la tarde estoy en casa.','пор ла ТАР-де эс-ТОЙ эн КА-са','Днём я дома.'],
+    ['Hablo con mi amiga.','А-бло кон ми а-МИ-га','Я говорю с подругой.'],
+    ['Por la noche veo una película.','пор ла НО-че БЕ-о У-на пе-ЛИ-ку-ла','Вечером я смотрю фильм.']
+  ], q:['Что покупают в магазине?', ['Хлеб и сыр','Воду и яблоки','Кофе и молоко','Вино и пиво'], 1]},
+  {id:'wea', emb:'Sol', title:'Погода', sub:'Рассказ: какая погода бывает в разные месяцы.', lines:[
+    ['Hoy hace sol.','ОЙ А-се СОЛЬ','Сегодня солнечно.'],
+    ['En julio hace mucho calor.','эн ХУ-лио А-се МУ-чо ка-ЛОР','В июле очень жарко.'],
+    ['En diciembre hace frío.','эн ди-СЬЕМ-бре А-се ФРИ-о','В декабре холодно.'],
+    ['En abril llueve mucho.','эн а-БРИЛЬ ЙУЭ-бе МУ-чо','В апреле много дождей.'],
+    ['En Rusia nieva en enero.','эн РУ-сья НЬЕ-ба эн э-НЕ-ро','В России снег идёт в январе.'],
+    ['¿Qué tiempo hace hoy?','ке ТЬЕМ-по А-се ОЙ','Какая сегодня погода?'],
+    ['Hace buen tiempo.','А-се БУЭН ТЬЕМ-по','Хорошая погода.'],
+    ['Me gusta el sol.','ме ГУС-та эль СОЛЬ','Мне нравится солнце.']
+  ], q:['В каком месяце в России идёт снег (по тексту)?', ['В июле','В апреле','В январе','В декабре'], 2]},
+  {id:'hotel', emb:'Hotel', title:'В отеле', sub:'Диалог: заселиться и найти свою комнату.', lines:[
+    ['— Buenas tardes. Tengo una reserva.','БУЭ-нас ТАР-дес. ТЕН-го У-на ре-СЕР-ба','— Добрый день. У меня бронь.'],
+    ['— ¿Cómo se llama?','КО-мо се ЙЯ-ма','— Как вас зовут?'],
+    ['— Me llamo Ana.','ме ЙЯ-мо А-на','— Меня зовут Ана.'],
+    ['— Muy bien. Aquí tiene la llave.','МУЙ БЬЕН. а-КИ ТЬЕ-не ла ЙА-бе','— Хорошо. Вот ваш ключ.'],
+    ['— ¿Dónde está la habitación?','ДОН-де эс-ТА ла а-би-та-СЬОН','— Где комната?'],
+    ['— Está en el segundo piso, a la derecha.','эс-ТА эн эль се-ГУН-до ПИ-со, а ла де-РЕ-ча','— Она на втором этаже, направо.'],
+    ['— Muchas gracias.','МУ-час ГРА-сьяс','— Большое спасибо.'],
+    ['— De nada. Buenas noches.','де НА-да. БУЭ-нас НО-чес','— Не за что. Спокойной ночи.']
+  ], q:['Где находится комната?', ['На первом этаже, налево','На втором этаже, направо','На третьем этаже, прямо','Внизу, у входа'], 1]},
+  {id:'way', emb:'¿Dónde?', title:'Как пройти?', sub:'Диалог: спросить дорогу до вокзала.', lines:[
+    ['— Perdón, ¿dónde está la estación?','пер-ДОН, ДОН-де эс-ТА ла эс-та-СЬОН','— Извините, где вокзал?'],
+    ['— Todo recto y luego a la izquierda.','ТО-до РРЕК-то и ЛУЭ-го а ла ис-КЬЕР-да','— Прямо, а потом налево.'],
+    ['— ¿Está lejos?','эс-ТА ЛЕ-хос','— Это далеко?'],
+    ['— No, está cerca.','НО, эс-ТА СЕР-ка','— Нет, близко.'],
+    ['— ¿Hay un taxi aquí?','АЙ ун ТАК-си а-КИ','— Здесь есть такси?'],
+    ['— Sí, a la derecha.','СИ, а ла де-РЕ-ча','— Да, направо.'],
+    ['— Muchas gracias.','МУ-час ГРА-сьяс','— Большое спасибо.'],
+    ['— De nada. ¡Buen viaje!','де НА-да. БУЭН БЬЯ-хе','— Не за что. Счастливого пути!']
+  ], q:['Как дойти до вокзала?', ['Налево, потом прямо','Прямо, потом налево','Только направо','Только прямо'], 1]},
+  {id:'market', emb:'Mercado', title:'На рынке', sub:'Диалог: купить килограмм яблок.', lines:[
+    ['— Buenos días. ¿Cuánto cuestan las manzanas?','БУЭ-нос ДИ-ас. КУАН-то КУЭС-тан лас ман-СА-нас','— Доброе утро. Сколько стоят яблоки?'],
+    ['— Dos euros el kilo.','ДОС ЭУ-рос эль КИ-ло','— Два евро за килограмм.'],
+    ['— Es barato. Quiero un kilo, por favor.','ЭС ба-РА-то. КЬЕ-ро ун КИ-ло, пор фа-БОР','— Это дёшево. Мне килограмм, пожалуйста.'],
+    ['— ¿Algo más?','АЛЬ-го МАС','— Что-нибудь ещё?'],
+    ['— No, nada más.','НО, НА-да МАС','— Нет, больше ничего.'],
+    ['— Son dos euros.','СОН ДОС ЭУ-рос','— С вас два евро.'],
+    ['— Aquí tiene. Gracias.','а-КИ ТЬЕ-не. ГРА-сьяс','— Вот, пожалуйста. Спасибо.'],
+    ['— Hasta luego.','АС-та ЛУЭ-го','— До свидания.']
+  ], q:['Что покупают на рынке?', ['Килограмм яблок','Два килограмма сыра','Бутылку воды','Хлеб'], 0]}
+];
+const TBY = {};
+TEXTS.forEach(t => { TBY[t.id] = t; });
+
+const INT = [0, 1, 2, 4, 8, 16];
+const RANKS = [[0,'Новичок'],[100,'Турист'],[300,'Путешественник'],[700,'Амиго'],[1500,'Знаток']];
+const CHEERS = ['Верно!','Отлично!','¡Muy bien!','¡Perfecto!','¡Genial!','Так держать!'];
+const rankOf = xp => { let r = 0; RANKS.forEach((x, i) => { if (xp >= x[0]) r = i; }); return r; };
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const plural = (n,a,b,c) => { const m = n % 100, d = n % 10; if (m > 10 && m < 20) return c; if (d === 1) return a; if (d >= 2 && d <= 4) return b; return c; };
+const sum = a => a.reduce((x,y) => x + y, 0);
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+const pad = n => (n < 10 ? '0' : '') + n;
+const dayKey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const addDays = (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
+const parseKey = k => { const a = k.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2], 12); };
+const noon = () => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; };
+const reached = r => !!r && r.n >= (r.g || 15);
+
+/* ---------- state + storage ---------- */
+const LS_KEY = 'ispanskii-s-nulya-v1';
+const defaults = () => ({v:1, w:{}, xp:0, days:{}, goal:15, sound:true, updated:0, r:{t:{}, best:0, qn:0, qok:0}});
+function normalize(o){
+  const d = defaults();
+  if (!o || typeof o !== 'object') return d;
+  let c; try { c = JSON.parse(JSON.stringify(o)); } catch (e) { return d; }
+  if (c.w && typeof c.w === 'object') Object.keys(c.w).forEach(k => {
+    const x = c.w[k];
+    if (BY[k] && x && typeof x.b === 'number' && typeof x.d === 'string') d.w[k] = {b:Math.max(0, Math.min(5, x.b | 0)), d:x.d};
+  });
+  d.xp = Math.max(0, +c.xp || 0);
+  if (c.days && typeof c.days === 'object') d.days = c.days;
+  if (c.goal === 10 || c.goal === 15 || c.goal === 30) d.goal = c.goal;
+  d.sound = c.sound !== false;
+  d.updated = +c.updated || 0;
+  if (c.r && typeof c.r === 'object'){
+    if (c.r.t && typeof c.r.t === 'object') Object.keys(c.r.t).forEach(k => { if (TBY[k] && c.r.t[k]) d.r.t[k] = 1; });
+    d.r.best = Math.max(0, Math.min(8, c.r.best | 0));
+    d.r.qn = Math.max(0, c.r.qn | 0); d.r.qok = Math.max(0, Math.min(d.r.qn, c.r.qok | 0));
+  }
+  return d;
+}
+let state = defaults();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) state = normalize(JSON.parse(raw)); } catch (e) {}
+(function prune(){
+  const cut = dayKey(addDays(noon(), -400));
+  Object.keys(state.days).forEach(k => { if (k < cut) delete state.days[k]; });
+})();
+
+let remote = null, rTimer = 0, rBusy = false, rDirty = false;
+function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+function touch(){ state.updated = Date.now(); saveLocal(); scheduleRemote(); }
+function scheduleRemote(){ if (!remote) return; rDirty = true; clearTimeout(rTimer); rTimer = setTimeout(flushRemote, 900); }
+async function flushRemote(){
+  if (!remote || rBusy || !rDirty) return;
+  rBusy = true; rDirty = false;
+  try { await remote.set(JSON.parse(JSON.stringify(state))); }
+  catch (e) { remote = null; renderSaveNote(); }
+  finally { rBusy = false; if (rDirty) scheduleRemote(); }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && rDirty){ clearTimeout(rTimer); flushRemote(); } });
+async function initRemote(){
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const got = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    const db = got[0], user = got[1];
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    const ref = db.collection('data/users/' + id).doc('spanish');
+    const snap = await ref.get();
+    let remoteUpdated = -1;
+    if (snap.exists){
+      const r = normalize(snap.data());
+      remoteUpdated = r.updated;
+      if (r.updated > state.updated){ state = r; saveLocal(); if (!playing) refreshAll(); }
+    }
+    remote = ref;
+    if (state.updated > 0 && state.updated > remoteUpdated){ rDirty = true; flushRemote(); }
+    renderSaveNote();
+  } catch (e) { renderSaveNote(); }
+}
+
+/* ---------- speech ---------- */
+const canSpeak = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+let voice = null;
+function loadVoices(){
+  if (!canSpeak) return;
+  let vs = []; try { vs = speechSynthesis.getVoices() || []; } catch (e) {}
+  const norm = v => (v.lang || '').replace('_', '-').toLowerCase();
+  const prefs = ['es-mx', 'es-us', 'es-419', 'es-es'];
+  let f = null;
+  for (let i = 0; i < prefs.length && !f; i++) f = vs.filter(v => norm(v) === prefs[i])[0] || null;
+  if (!f) f = vs.filter(v => norm(v).indexOf('es') === 0)[0] || null;
+  voice = f;
+}
+function speak(t, force){
+  if ((!state.sound && !force) || !canSpeak) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = voice ? voice.lang : 'es-MX'; if (voice) u.voice = voice; u.rate = 0.85;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const spk = big => canSpeak ? '<button type="button" class="spk' + (big ? ' big' : '') + '" aria-label="Послушать">' + SPK + '</button>' : '';
+
+/* ---------- progress math ---------- */
+function todayRec(){
+  const k = dayKey(new Date());
+  return state.days[k] || (state.days[k] = {n:0, x:0, g:state.goal});
+}
+function streakNow(){
+  let d = noon();
+  if (!reached(state.days[dayKey(d)])) d = addDays(d, -1);
+  let n = 0;
+  while (reached(state.days[dayKey(d)])){ n++; d = addDays(d, -1); }
+  return n;
+}
+function bestStreak(){
+  const keys = Object.keys(state.days).filter(k => reached(state.days[k])).sort();
+  let best = 0, run = 0, prev = null;
+  keys.forEach(k => {
+    if (prev && dayKey(addDays(parseKey(prev), 1)) === k) run++; else run = 1;
+    if (run > best) best = run;
+    prev = k;
+  });
+  return best;
+}
+const learnedCount = list => list.filter(i => state.w[i.id] && state.w[i.id].b >= 3).length;
+const isDue = it => { const w = state.w[it.id]; return !!w && w.d <= dayKey(new Date()); };
+
+function plan(unitId){
+  const pool = ITEMS.filter(i => !unitId || i.u === unitId);
+  const due = pool.filter(isDue).sort((a, b) => state.w[a.id].d < state.w[b.id].d ? -1 : 1).slice(0, 6);
+  const fresh = pool.filter(i => !state.w[i.id]).slice(0, Math.max(0, Math.min(5, 10 - due.length)));
+  const rest = pool.filter(i => state.w[i.id] && !isDue(i));
+  const need = Math.min(8, pool.length) - (due.length + fresh.length);
+  const extra = need > 0 ? shuffle(rest.slice()).slice(0, need) : [];
+  return {due:due, fresh:fresh, extra:extra};
+}
+
+/* ---------- session ---------- */
+const el = {
+  home:$('home'), play:$('play'), chips:$('chips'), hero:$('hero'), goal:$('goal'), goalTxt:$('goalTxt'), bar:$('bar'), barFill:$('barFill'),
+  units:$('units'), readList:$('readList'), stats:$('stats'), rankBox:$('rankBox'), cal:$('cal'), goalSeg:$('goalSeg'), soundBtn:$('soundBtn'), saveNote:$('saveNote'),
+  pExit:$('pExit'), pBar:$('pBar'), pFill:$('pFill'), pXp:$('pXp'), pStage:$('pStage'), pFoot:$('pFoot'), pMsg:$('pMsg'), pNext:$('pNext')
+};
+let S = null, playing = false, reading = false, footAction = null;
+
+function kindsFor(it){
+  const k = ['es-ru', 'ru-es'];
+  if (voice) k.push('listen');
+  if (it.toks >= 3) k.push('build', 'build');
+  return k;
+}
+function pickKind(it, avoid){
+  if (!state.w[it.id]) return 'es-ru';
+  let k = kindsFor(it).filter(x => x !== avoid);
+  if (!k.length) k = ['es-ru'];
+  return k[Math.floor(Math.random() * k.length)];
+}
+function distract(it){
+  const same = ITEMS.filter(x => x.u === it.u && x.id !== it.id);
+  const pref = same.filter(x => (x.toks > 1) === (it.toks > 1));
+  let pool = shuffle(pref.slice());
+  if (pool.length < 3) pool = pool.concat(shuffle(same.filter(x => pref.indexOf(x) < 0)));
+  if (pool.length < 3) pool = pool.concat(shuffle(ITEMS.filter(x => x.u !== it.u)));
+  return pool.slice(0, 3);
+}
+
+function startSession(unitId){
+  loadVoices();
+  const p = plan(unitId);
+  const blocks = [];
+  p.fresh.forEach(it => blocks.push([{t:'intro', it:it}, {t:'q', it:it, kind:'es-ru', first:true}]));
+  p.due.concat(p.extra).forEach(it => blocks.push([{t:'q', it:it, kind:pickKind(it, ''), first:true}]));
+  const steps = [].concat.apply([], shuffle(blocks));
+  S = {steps:steps, i:0, done:0, total:steps.length, xp:0, ok:0, wrong:0, learned:0, rank0:rankOf(state.xp), unitId:unitId, locked:false, cur:null, opts:null, b:null};
+  playing = true;
+  el.home.hidden = true; el.play.hidden = false;
+  window.scrollTo(0, 0);
+  show();
+}
+function exitPlay(){
+  try { if (canSpeak) speechSynthesis.cancel(); } catch (e) {}
+  playing = false; S = null;
+  el.play.hidden = true; el.home.hidden = false;
+  refreshAll(); window.scrollTo(0, 0);
+}
+function setFoot(o){
+  el.pFoot.hidden = false;
+  el.pFoot.className = 'p-foot ' + (o.kind || '');
+  el.pMsg.innerHTML = o.msg || '';
+  el.pNext.textContent = o.btn; el.pNext.disabled = !!o.disabled;
+  footAction = o.onClick;
+  if (o.kind || o.btn === 'Понятно'){ try { el.pNext.focus({preventScroll:true}); } catch (e) {} }
+}
+function hideFoot(){ el.pFoot.hidden = true; footAction = null; }
+function setProgress(){
+  const pct = S.total ? Math.round(S.done / S.total * 100) : 0;
+  el.pFill.style.width = pct + '%';
+  el.pBar.setAttribute('aria-valuenow', pct);
+  el.pXp.textContent = '+' + S.xp + ' XP';
+}
+function advance(){ S.done++; S.i++; S.locked = false; show(); }
+function addXp(n){ state.xp += n; const r = todayRec(); r.x = (r.x || 0) + n; S.xp += n; }
+
+function show(){
+  if (S.i >= S.steps.length) return finish();
+  const st = S.steps[S.i];
+  setProgress(); hideFoot();
+  S.cur = st;
+  if (st.t === 'intro') renderIntro(st);
+  else if (st.kind === 'build') renderBuild(st);
+  else renderChoice(st);
+}
+function bindSpk(){
+  Array.prototype.forEach.call(el.pStage.querySelectorAll('.spk'), b => b.addEventListener('click', () => speak(S.cur.it.es, true)));
+}
+
+function renderIntro(st){
+  const it = st.it;
+  el.pStage.innerHTML =
+    '<p class="q-label">Новое слово</p>' +
+    '<div class="q-card azulejo"><div class="es">' + esc(it.es) + '</div><div class="tr">' + esc(it.tr) + '</div>' + spk(false) + '</div>' +
+    '<p class="ru-big">' + esc(it.ru) + '</p>' + (it.note ? '<p class="note">' + esc(it.note) + '</p>' : '');
+  bindSpk();
+  speak(it.es);
+  setFoot({msg:'<strong>Запомни и произнеси вслух</strong>', btn:'Понятно', onClick:() => { addXp(5); touch(); advance(); }});
+}
+
+function renderChoice(st){
+  const it = st.it, kind = st.kind;
+  const opts = shuffle([it].concat(distract(it)));
+  S.opts = opts;
+  let label, card;
+  if (kind === 'es-ru'){
+    label = 'Что это значит?';
+    card = '<div class="es">' + esc(it.es) + '</div><div class="tr">' + esc(it.tr) + '</div>' + spk(false);
+  } else if (kind === 'ru-es'){
+    label = 'Как это по-испански?';
+    card = '<div class="ru-big">' + esc(it.ru) + '</div>';
+  } else {
+    label = 'Что ты слышишь?';
+    card = spk(true) + '<div class="tr">Нажми на динамик, чтобы послушать ещё раз</div>';
+  }
+  const showEs = kind === 'ru-es';
+  el.pStage.innerHTML =
+    '<p class="q-label">' + label + '</p><div class="q-card azulejo">' + card + '</div><div class="opts" id="opts">' +
+    opts.map((o, i) => '<button type="button" class="opt" data-i="' + i + '">' + (showEs ? esc(o.es) + '<small>' + esc(o.tr) + '</small>' : esc(o.ru)) + '</button>').join('') +
+    '</div>';
+  bindSpk();
+  Array.prototype.forEach.call(el.pStage.querySelectorAll('.opt'), b => b.addEventListener('click', () => choose(+b.getAttribute('data-i'))));
+  if (kind !== 'ru-es') speak(it.es);
+}
+function choose(i){
+  if (S.locked) return;
+  S.locked = true;
+  const st = S.cur, ok = S.opts[i].id === st.it.id;
+  const bs = el.pStage.querySelectorAll('.opt');
+  bs[i].classList.add(ok ? 'right' : 'wrong');
+  if (!ok) Array.prototype.forEach.call(bs, (b, j) => { if (S.opts[j].id === st.it.id) b.classList.add('right'); });
+  answered(st, ok);
+}
+
+function tileBtn(txt, ghost, fn){
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'tile' + (ghost ? ' ghost' : ''); b.textContent = txt;
+  if (ghost){ b.tabIndex = -1; b.setAttribute('aria-hidden', 'true'); } else b.addEventListener('click', fn);
+  return b;
+}
+function renderBuild(st){
+  const it = st.it, toks = it.es.split(' ');
+  let order = toks.map((t, i) => i), tries = 0;
+  do { shuffle(order); tries++; } while (tries < 6 && order.every((v, i) => v === i));
+  S.b = {toks:toks, order:order, placed:[]};
+  el.pStage.innerHTML =
+    '<p class="q-label">Собери по-испански</p>' +
+    '<div class="q-card azulejo"><div class="ru-big">' + esc(it.ru) + '</div></div>' +
+    '<div class="ans" id="ans" aria-label="Твоя фраза"></div><div class="bank" id="bank"></div>';
+  drawBuild();
+}
+function drawBuild(){
+  const B = S.b, ans = $('ans'), bank = $('bank');
+  ans.innerHTML = ''; bank.innerHTML = '';
+  B.placed.forEach(i => ans.appendChild(tileBtn(B.toks[i], false, () => {
+    if (S.locked) return;
+    B.placed.splice(B.placed.indexOf(i), 1); drawBuild();
+  })));
+  B.order.forEach(i => {
+    const used = B.placed.indexOf(i) >= 0;
+    bank.appendChild(tileBtn(B.toks[i], used, () => {
+      if (S.locked) return;
+      B.placed.push(i); drawBuild();
+    }));
+  });
+  setFoot({msg:'', btn:'Проверить', disabled:B.placed.length !== B.toks.length, onClick:checkBuild});
+}
+function checkBuild(){
+  if (S.locked) return;
+  const B = S.b, st = S.cur;
+  if (B.placed.length !== B.toks.length) return;
+  S.locked = true;
+  const ok = B.placed.map(i => B.toks[i]).join(' ') === st.it.es;
+  answered(st, ok);
+}
+
+function grade(st, ok){
+  const it = st.it, rec = todayRec();
+  rec.n++;
+  if (ok){ S.ok++; addXp(10); } else S.wrong++;
+  if (st.first){
+    const w = state.w[it.id];
+    let b;
+    if (!w) b = ok ? 2 : 1;
+    else b = ok ? Math.min(5, w.b + 1) : Math.max(1, w.b - 1);
+    if (b >= 3 && (!w || w.b < 3)) S.learned++;
+    state.w[it.id] = {b:b, d:dayKey(addDays(noon(), INT[b]))};
+  }
+  if (!ok && !st.requeued){
+    st.requeued = true;
+    S.steps.push({t:'q', it:it, kind:pickKind(it, st.kind), first:false, requeued:true});
+    S.total++;
+  }
+  touch();
+}
+function answered(st, ok){
+  grade(st, ok);
+  const it = st.it, extra = [];
+  const rec = state.days[dayKey(new Date())];
+  if (rec && rec.n === (rec.g || state.goal)) extra.push('Цель на сегодня выполнена!');
+  speak(it.es);
+  const head = ok ? CHEERS[Math.floor(Math.random() * CHEERS.length)] : 'Почти. Правильно так:';
+  let msg = '<strong>' + esc(head) + '</strong>' + esc(it.es) + ' — ' + esc(it.ru);
+  if (!ok && it.note) msg += '<small>' + esc(it.note) + '</small>';
+  if (extra.length) msg += '<small>' + esc(extra.join(' ')) + '</small>';
+  setProgress();
+  setFoot({kind:ok ? 'good' : 'bad', msg:msg, btn:'Дальше', onClick:advance});
+}
+
+function finish(){
+  hideFoot();
+  S.done = S.total; setProgress();
+  const total = S.ok + S.wrong;
+  const r1 = rankOf(state.xp);
+  let bonus = 0;
+  if (S.wrong === 0 && total > 0){ bonus = 10; addXp(10); touch(); setProgress(); }
+  const newRank = r1 > S.rank0 ? '<p>Новое звание: <b>' + esc(RANKS[r1][1]) + '</b></p>' : '';
+  const unit = S.unitId;
+  el.pStage.innerHTML =
+    '<div class="sum azulejo"><h2>' + (S.wrong === 0 && total > 0 ? '¡Perfecto!' : 'Готово!') + '</h2><div class="big">+' + S.xp + ' XP</div>' +
+    (bonus ? '<p>Без ошибок: бонус +10 XP</p>' : '') + newRank + '</div>' +
+    '<div class="sum-list"><div>Верных ответов<span>' + S.ok + ' из ' + total + '</span></div>' +
+    '<div>Слов выучено в этой тренировке<span>' + S.learned + '</span></div>' +
+    '<div>Всего выучено<span>' + learnedCount(ITEMS) + ' из ' + ITEMS.length + '</span></div></div>' +
+    '<div class="sum-act"><button type="button" class="cta" id="again">Ещё тренировка</button><button type="button" class="btn quiet" id="homeBtn">На главную</button></div>';
+  $('again').addEventListener('click', () => startSession(unit));
+  $('homeBtn').addEventListener('click', exitPlay);
+}
+
+/* ---------- home rendering ---------- */
+function renderTop(){
+  const s = streakNow(), r = rankOf(state.xp);
+  el.chips.innerHTML =
+    '<span class="chip sun">' + (s > 0 ? '<b>' + s + '</b> ' + plural(s, 'день', 'дня', 'дней') + ' подряд' : 'Серия начнётся сегодня') + '</span>' +
+    '<span class="chip rank">' + esc(RANKS[r][1]) + ' · ' + state.xp + ' XP</span>';
+  const rec = state.days[dayKey(new Date())];
+  const n = rec ? rec.n : 0, g = rec && rec.g ? rec.g : state.goal;
+  el.goalTxt.textContent = n >= g ? n + ' · цель выполнена' : n + ' из ' + g + ' ответов';
+  el.barFill.style.width = Math.min(100, Math.round(n / g * 100)) + '%';
+  el.bar.setAttribute('aria-valuemax', g); el.bar.setAttribute('aria-valuenow', Math.min(n, g));
+  el.goal.classList.toggle('done', n >= g);
+}
+function renderHero(){
+  const p = plan(null), n = p.due.length, f = p.fresh.length, x = p.extra.length;
+  let meta;
+  if (state.updated === 0 && n === 0) meta = 'Начнём с приветствий: ' + f + ' ' + plural(f, 'новое слово', 'новых слова', 'новых слов') + '.';
+  else meta = 'Повторить: ' + n + ' · Новых слов: ' + f + (x ? ' · Для разминки: ' + x : '');
+  el.hero.innerHTML =
+    '<h2>Тренировка дня</h2><p>Пять минут: пара новых слов, повторение и сборка фраз. Через неделю закажешь кофе по-испански.</p>' +
+    '<div class="meta">' + esc(meta) + '</div><button type="button" class="cta" id="startBtn">Начать</button>';
+  $('startBtn').addEventListener('click', () => startSession(null));
+}
+function renderUnits(){
+  el.units.innerHTML = '';
+  UNITS.forEach(u => {
+    const list = ITEMS.filter(i => i.u === u.id), seen = list.filter(i => state.w[i.id]).length, learned = learnedCount(list);
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'unit';
+    b.innerHTML =
+      '<span class="emb azulejo">' + esc(u.emb) + '</span>' +
+      '<span><span class="u-t">' + esc(u.title) + '</span><span class="u-s">' + esc(u.sub) + '</span>' +
+      '<span class="u-m"><span class="mini"><i style="width:' + Math.round(learned / list.length * 100) + '%"></i></span>' +
+      '<span>' + (seen ? learned + ' из ' + list.length + ' выучено' : list.length + ' ' + plural(list.length, 'слово', 'слова', 'слов')) + '</span></span></span>';
+    b.addEventListener('click', () => startSession(u.id));
+    li.appendChild(b); el.units.appendChild(li);
+  });
+}
+function renderProgress(){
+  const days = Object.keys(state.days);
+  const practiced = days.filter(k => state.days[k].n > 0).length;
+  el.stats.innerHTML =
+    '<div><dt>Серия</dt><dd>' + streakNow() + '</dd></div>' +
+    '<div><dt>Лучшая серия</dt><dd>' + bestStreak() + '</dd></div>' +
+    '<div><dt>Слов выучено</dt><dd>' + learnedCount(ITEMS) + '</dd></div>' +
+    '<div><dt>Дней занятий</dt><dd>' + practiced + '</dd></div>' +
+    '<div><dt>Текстов прочитано</dt><dd>' + Object.keys(state.r.t).length + ' из ' + TEXTS.length + '</dd></div>';
+  const r = rankOf(state.xp);
+  if (r < RANKS.length - 1){
+    const a = RANKS[r][0], b = RANKS[r + 1][0];
+    el.rankBox.innerHTML = '<div class="goal-row"><span>Звание: ' + esc(RANKS[r][1]) + '</span><span>до «' + esc(RANKS[r + 1][1]) + '» ' + (b - state.xp) + ' XP</span></div>' +
+      '<div class="bar"><i style="width:' + Math.round((state.xp - a) / (b - a) * 100) + '%"></i></div>';
+  } else el.rankBox.innerHTML = '<div class="goal-row"><span>Звание: ' + esc(RANKS[r][1]) + '</span><span>высшее</span></div>';
+
+  const today = noon(), tk = dayKey(today), dow = (today.getDay() + 6) % 7, start = addDays(today, -(dow + 21));
+  let c = '<div class="calh">' + ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d => '<span>' + d + '</span>').join('') + '</div><div class="cal">';
+  for (let i = 0; i < 28; i++){
+    const d = addDays(start, i), k = dayKey(d), rec = state.days[k];
+    let cls = reached(rec) ? 'full' : (rec && rec.n > 0 ? 'part' : '');
+    if (k === tk) cls += ' today';
+    if (k > tk) cls += ' future';
+    c += '<i class="' + cls + '" title="' + d.getDate() + '.' + pad(d.getMonth() + 1) + ': ' + (rec ? rec.n : 0) + ' ответов">' + d.getDate() + '</i>';
+  }
+  el.cal.innerHTML = c + '</div>';
+
+  el.goalSeg.innerHTML = '';
+  [10, 15, 30].forEach(g => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = g; b.setAttribute('aria-pressed', String(state.goal === g));
+    b.addEventListener('click', () => {
+      state.goal = g;
+      const rec = state.days[dayKey(new Date())]; if (rec) rec.g = g;
+      touch(); renderTop(); renderProgress();
+    });
+    el.goalSeg.appendChild(b);
+  });
+}
+function renderSound(){
+  el.soundBtn.textContent = state.sound ? 'Автоозвучка включена' : 'Автоозвучка выключена';
+  el.soundBtn.setAttribute('aria-pressed', String(state.sound));
+  if (!canSpeak){ el.soundBtn.disabled = true; el.soundBtn.textContent = 'Озвучка недоступна в этом браузере'; }
+}
+function renderSaveNote(){
+  el.saveNote.textContent = remote
+    ? 'Прогресс сохраняется в твоём аккаунте и на этом устройстве, поэтому он виден и на телефоне, и на компьютере.'
+    : 'Прогресс сохраняется только в этом браузере. На другом устройстве он не появится.';
+}
+function refreshAll(){ renderTop(); renderHero(); renderRead(); renderUnits(); renderProgress(); renderSound(); renderSaveNote(); }
+
+/* ---------- reader: rules, quiz, texts ---------- */
+const R = {root:$('read'), title:$('rTitle'), back:$('rBack'), stage:$('rStage'), foot:$('rFoot'), msg:$('rMsg'), next:$('rNext')};
+const rd = {view:'rules', textId:null, tr:true, ru:false, quiz:null, open:'', act:null};
+const plain = t => t.replace(/^[—–-]\s*/, '');
+
+function rFoot(o){
+  if (!o){ R.foot.hidden = true; rd.act = null; return; }
+  R.foot.hidden = false; R.foot.className = 'p-foot ' + (o.kind || '');
+  R.msg.innerHTML = o.msg || ''; R.next.textContent = o.btn; rd.act = o.onClick;
+  if (o.kind){ try { R.next.focus({preventScroll:true}); } catch (e) {} }
+}
+function bindRowSpk(root){
+  Array.prototype.forEach.call(root.querySelectorAll('[data-s]'), b => b.addEventListener('click', e => { e.stopPropagation(); speak(b.getAttribute('data-s'), true); }));
+}
+function spkSm(txt){
+  return canSpeak ? '<button type="button" class="spk sm" data-s="' + esc(plain(txt)) + '" aria-label="Послушать">' + SPK + '</button>' : '';
+}
+function rowHtml(r){
+  return '<div class="rw' + (canSpeak ? '' : ' nos') + '">' + spkSm(r[0]) +
+    '<div class="rw-t"><span class="rw-es">' + esc(r[4] || r[0]) + '</span><span class="rw-tr">' + esc(r[1]) + '</span></div>' +
+    '<div class="rw-ru">' + esc(r[2]) + (r[3] ? '<small>' + esc(r[3]) + '</small>' : '') + '</div></div>';
+}
+function openReader(view){
+  loadVoices();
+  rd.view = view; reading = true;
+  el.home.hidden = true; R.root.hidden = false;
+  renderReader(); window.scrollTo(0, 0);
+}
+function closeReader(){
+  try { if (canSpeak) speechSynthesis.cancel(); } catch (e) {}
+  reading = false; rd.quiz = null;
+  R.root.hidden = true; el.home.hidden = false;
+  refreshAll(); window.scrollTo(0, 0);
+}
+function backReader(){
+  try { if (canSpeak) speechSynthesis.cancel(); } catch (e) {}
+  if (rd.view === 'quiz') rd.view = 'rules';
+  else if (rd.view === 'text') rd.view = 'texts';
+  else return closeReader();
+  renderReader(); window.scrollTo(0, 0);
+}
+function renderReader(){
+  rFoot(null);
+  if (rd.view === 'rules') renderRules();
+  else if (rd.view === 'quiz') renderQuizQ();
+  else if (rd.view === 'result') renderQuizEnd();
+  else if (rd.view === 'texts') renderTexts();
+  else renderText();
+}
+
+/* rules */
+function renderRules(){
+  R.title.textContent = 'Правила чтения';
+  let h = '<p class="note" style="text-align:left">Испанский читается почти так, как пишется. Открывай уроки по очереди и нажимай на динамик, чтобы услышать слово. В подсказках заглавными буквами выделен ударный слог.</p><div class="rd-stack">';
+  RULES.forEach((r, i) => {
+    h += '<details class="lesson" data-id="' + r.id + '"' + (rd.open === r.id ? ' open' : '') + '><summary>' + (i + 1) + '. ' + esc(r.title) + '</summary><div class="lesson-body"><p>' + esc(r.intro) + '</p><div>' +
+      r.rows.map(rowHtml).join('') + '</div></div></details>';
+  });
+  const best = state.r.best;
+  h += '</div><div class="rd-card"><h2 class="sec" style="margin:0">Проверь себя</h2><p class="note" style="text-align:left">Восемь слов, которых ты ещё не учила. Выбери, как каждое читается.' +
+    (state.r.qn ? ' Лучший результат: ' + best + ' из 8.' : '') + '</p><button type="button" class="cta" id="quizGo">Начать проверку</button></div>';
+  R.stage.innerHTML = h;
+  bindRowSpk(R.stage);
+  Array.prototype.forEach.call(R.stage.querySelectorAll('details.lesson'), d => d.addEventListener('toggle', () => { if (d.open) rd.open = d.getAttribute('data-id'); }));
+  $('quizGo').addEventListener('click', startQuiz);
+}
+
+/* quiz on reading rules */
+const SWAPS = [['х','г'],['г','х'],['с','к'],['к','с'],['нь','н'],['й','л'],['б','в'],['ч','ш'],['рр','р'],['р','рр'],['ль','л'],['ж','х']];
+function swapOnce(s, a, b){
+  const m = s.match(new RegExp(a, 'i'));
+  if (!m) return null;
+  const up = m[0] !== m[0].toLowerCase() && m[0] === m[0].toUpperCase();
+  return s.replace(m[0], up ? b.toUpperCase() : b);
+}
+function mutants(tr, es){
+  const out = [], sy = tr.split('-');
+  const cur = sy.findIndex(x => /[А-ЯЁ]/.test(x));
+  if (sy.length > 1 && cur >= 0) sy.forEach((x, i) => {
+    if (i === cur) return;
+    const c = sy.slice(); c[cur] = c[cur].toLowerCase(); c[i] = c[i].toUpperCase(); out.push(c.join('-'));
+  });
+  SWAPS.forEach(p => { const v = swapOnce(tr, p[0], p[1]); if (v && v !== tr) out.push(v); });
+  if (/^h/i.test(es)) out.push((tr[0] === tr[0].toUpperCase() ? 'Х' : 'х') + tr);
+  if (/(qu|gu)[ei]/i.test(es)) out.push(tr.replace(/([КкГг])([ЕеИи])/, (m, a, b) => a + (b === b.toUpperCase() ? 'У' : 'у') + b));
+  const seen = {}; seen[tr] = 1;
+  return out.filter(x => !seen[x] && (seen[x] = 1));
+}
+function quizPool(){
+  const seen = {}, rows = [];
+  RULES.forEach(r => { if (r.id === 'abc') return; r.rows.forEach(x => {
+    const k = x[0].toLowerCase();
+    if (seen[k] || x[0].indexOf(' ') >= 0 || /[¿¡]/.test(x[0]) || !/[А-ЯЁ]/.test(x[1])) return;
+    seen[k] = 1; rows.push({x:x, rule:r.title});
+  }); });
+  return rows;
+}
+function startQuiz(){
+  const pool = quizPool();
+  rd.quiz = {list:shuffle(pool.slice()).slice(0, 8), pool:pool, i:0, ok:0, locked:false, opts:null};
+  rd.view = 'quiz'; renderReader(); window.scrollTo(0, 0);
+}
+function renderQuizQ(){
+  const Q = rd.quiz, q = Q.list[Q.i], x = q.x;
+  R.title.textContent = 'Проверка: ' + (Q.i + 1) + ' из ' + Q.list.length;
+  let opts = shuffle(mutants(x[1], x[0])).slice(0, 3);
+  if (opts.length < 3){
+    const extra = shuffle(Q.pool.map(p => p.x[1]).filter(t => t !== x[1] && opts.indexOf(t) < 0));
+    opts = opts.concat(extra.slice(0, 3 - opts.length));
+  }
+  Q.opts = shuffle([x[1]].concat(opts)); Q.locked = false;
+  R.stage.innerHTML =
+    '<p class="q-label">Как это читается?</p><div class="q-card azulejo"><div class="es">' + esc(x[0]) + '</div>' + (canSpeak ? '<button type="button" class="spk" data-s="' + esc(x[0]) + '" aria-label="Послушать">' + SPK + '</button>' : '') + '</div>' +
+    '<div class="opts">' + Q.opts.map((o, i) => '<button type="button" class="opt" data-i="' + i + '">' + esc(o) + '</button>').join('') + '</div>';
+  bindRowSpk(R.stage);
+  Array.prototype.forEach.call(R.stage.querySelectorAll('.opt'), b => b.addEventListener('click', () => quizPick(+b.getAttribute('data-i'))));
+  rFoot(null);
+}
+function quizPick(i){
+  const Q = rd.quiz; if (Q.locked) return;
+  Q.locked = true;
+  const q = Q.list[Q.i], x = q.x, ok = Q.opts[i] === x[1];
+  const bs = R.stage.querySelectorAll('.opt');
+  bs[i].classList.add(ok ? 'right' : 'wrong');
+  if (!ok) Array.prototype.forEach.call(bs, (b, j) => { if (Q.opts[j] === x[1]) b.classList.add('right'); });
+  const rec = todayRec(); rec.n++;
+  state.r.qn++;
+  if (ok){ Q.ok++; state.r.qok++; state.xp += 5; rec.x = (rec.x || 0) + 5; }
+  touch();
+  speak(x[0]);
+  const last = Q.i + 1 >= Q.list.length;
+  let msg = '<strong>' + (ok ? 'Верно!' : 'Почти. Правильно так:') + '</strong>' + esc(x[0]) + ' — ' + esc(x[1]) + ' (' + esc(x[2]) + ')';
+  if (x[3]) msg += '<small>' + esc(x[3]) + '</small>';
+  else if (!ok) msg += '<small>Урок: ' + esc(q.rule) + '</small>';
+  rFoot({kind:ok ? 'good' : 'bad', msg:msg, btn:last ? 'Результат' : 'Дальше', onClick:() => {
+    if (last){ rd.view = 'result'; renderReader(); } else { Q.i++; renderQuizQ(); }
+    window.scrollTo(0, 0);
+  }});
+}
+function renderQuizEnd(){
+  const Q = rd.quiz, n = Q.list.length;
+  let bonus = 0;
+  if (Q.ok === n){ bonus = 10; state.xp += 10; const rec = todayRec(); rec.x = (rec.x || 0) + 10; }
+  if (Q.ok > state.r.best) state.r.best = Q.ok;
+  touch();
+  R.title.textContent = 'Результат';
+  R.stage.innerHTML =
+    '<div class="res azulejo"><h2>' + (Q.ok === n ? '¡Perfecto!' : Q.ok >= n - 2 ? '¡Muy bien!' : 'Хорошая попытка') + '</h2><div class="big">' + Q.ok + ' из ' + n + '</div>' +
+    '<p>+' + (Q.ok * 5 + bonus) + ' XP' + (bonus ? ' (с бонусом за все верные)' : '') + '</p></div>' +
+    '<div class="sum-act"><button type="button" class="cta" id="qAgain">Ещё раз</button><button type="button" class="btn quiet" id="qBack">К правилам</button></div>';
+  $('qAgain').addEventListener('click', startQuiz);
+  $('qBack').addEventListener('click', () => { rd.view = 'rules'; rd.quiz = null; renderReader(); window.scrollTo(0, 0); });
+}
+
+/* texts */
+function renderTexts(){
+  R.title.textContent = 'Тексты для чтения';
+  let h = '<p class="note" style="text-align:left">Читай вслух по транскрипции, потом проверяй себя по переводу. Нажми на любую фразу, чтобы увидеть перевод.</p><ul class="units" id="txList"></ul>';
+  R.stage.innerHTML = h;
+  const ul = $('txList');
+  TEXTS.forEach(t => {
+    const li = document.createElement('li'), b = document.createElement('button');
+    b.type = 'button'; b.className = 'unit';
+    b.innerHTML = '<span class="emb azulejo">' + esc(t.emb) + '</span><span><span class="u-t">' + esc(t.title) + '</span><span class="u-s">' + esc(t.sub) + '</span>' +
+      '<span class="u-m">' + (state.r.t[t.id] ? 'Прочитано' : t.lines.length + ' ' + plural(t.lines.length, 'фраза', 'фразы', 'фраз')) + '</span></span>';
+    b.addEventListener('click', () => { rd.view = 'text'; rd.textId = t.id; renderReader(); window.scrollTo(0, 0); });
+    li.appendChild(b); ul.appendChild(li);
+  });
+}
+function speakAll(lines, btn){
+  if (!canSpeak) return;
+  try {
+    if (speechSynthesis.speaking){ speechSynthesis.cancel(); btn.textContent = 'Слушать весь текст'; return; }
+    speechSynthesis.cancel();
+    lines.forEach((l, i) => {
+      const u = new SpeechSynthesisUtterance(plain(l[0]));
+      u.lang = voice ? voice.lang : 'es-MX'; if (voice) u.voice = voice; u.rate = 0.85;
+      if (i === lines.length - 1) u.onend = () => { btn.textContent = 'Слушать весь текст'; };
+      speechSynthesis.speak(u);
+    });
+    btn.textContent = 'Стоп';
+  } catch (e) {}
+}
+function renderText(){
+  const t = TBY[rd.textId];
+  R.title.textContent = t.title;
+  let h = '<div class="tx-ctl"><button type="button" class="btn tg" id="tgTr" aria-pressed="' + rd.tr + '">Транскрипция</button>' +
+    '<button type="button" class="btn tg" id="tgRu" aria-pressed="' + rd.ru + '">Перевод</button>' +
+    (canSpeak ? '<button type="button" class="btn" id="tgAll">Слушать весь текст</button>' : '') + '</div>' +
+    '<div class="lines" id="lines" data-tr="' + (rd.tr ? 1 : 0) + '" data-ru="' + (rd.ru ? 1 : 0) + '">' +
+    t.lines.map(l => '<div class="ln' + (canSpeak ? '' : ' nos') + '">' + spkSm(l[0]) +
+      '<button type="button" class="ln-b" aria-label="Показать перевод"><span class="l-es">' + esc(l[0]) + '</span><span class="l-tr">' + esc(l[1]) + '</span><span class="l-ru">' + esc(l[2]) + '</span></button></div>').join('') +
+    '</div>' +
+    '<div class="rd-card"><p class="q-label">Проверь, как поняла</p><p class="q-title">' + esc(t.q[0]) + '</p><div class="opts" id="tqOpts">' +
+    t.q[1].map((o, i) => '<button type="button" class="opt" data-i="' + i + '">' + esc(o) + '</button>').join('') + '</div></div>';
+  R.stage.innerHTML = h;
+  bindRowSpk(R.stage);
+  Array.prototype.forEach.call(R.stage.querySelectorAll('.ln-b'), b => b.addEventListener('click', () => b.parentNode.classList.toggle('open')));
+  $('tgTr').addEventListener('click', () => { rd.tr = !rd.tr; $('tgTr').setAttribute('aria-pressed', String(rd.tr)); $('lines').setAttribute('data-tr', rd.tr ? 1 : 0); });
+  $('tgRu').addEventListener('click', () => { rd.ru = !rd.ru; $('tgRu').setAttribute('aria-pressed', String(rd.ru)); $('lines').setAttribute('data-ru', rd.ru ? 1 : 0); });
+  if ($('tgAll')) $('tgAll').addEventListener('click', () => speakAll(t.lines, $('tgAll')));
+  let answered = false;
+  Array.prototype.forEach.call(R.stage.querySelectorAll('#tqOpts .opt'), (b, i) => b.addEventListener('click', () => {
+    if (answered) return; answered = true;
+    const bs = R.stage.querySelectorAll('#tqOpts .opt');
+    b.classList.add(i === t.q[2] ? 'right' : 'wrong'); bs[t.q[2]].classList.add('right');
+  }));
+  const first = !state.r.t[t.id];
+  rFoot({msg:first ? '' : '<small>Этот текст уже прочитан</small>', btn:first ? 'Прочитала' : 'К текстам', onClick:() => {
+    if (first){
+      state.r.t[t.id] = 1; state.xp += 15; const rec = todayRec(); rec.x = (rec.x || 0) + 15; touch();
+      rFoot({kind:'good', msg:'<strong>Текст прочитан!</strong>+15 XP', btn:'К текстам', onClick:() => { rd.view = 'texts'; renderReader(); window.scrollTo(0, 0); }});
+    } else { rd.view = 'texts'; renderReader(); window.scrollTo(0, 0); }
+  }});
+}
+
+/* home entries */
+function renderRead(){
+  const doneT = Object.keys(state.r.t).length;
+  el.readList.innerHTML = '';
+  [
+    {emb:'ñ ll ch', title:'Правила чтения', sub:'Девять коротких уроков и проверка: как читать любое испанское слово.', meta:state.r.qn ? 'Лучший результат проверки: ' + state.r.best + ' из 8' : '9 уроков и проверка', pct:state.r.best / 8 * 100, view:'rules'},
+    {emb:'Texto', title:'Тексты для чтения', sub:'Диалоги и рассказы: читай вслух, слушай, проверяй себя.', meta:doneT + ' из ' + TEXTS.length + ' прочитано', pct:doneT / TEXTS.length * 100, view:'texts'}
+  ].forEach(c => {
+    const li = document.createElement('li'), b = document.createElement('button');
+    b.type = 'button'; b.className = 'unit';
+    b.innerHTML = '<span class="emb azulejo">' + esc(c.emb) + '</span><span><span class="u-t">' + esc(c.title) + '</span><span class="u-s">' + esc(c.sub) + '</span>' +
+      '<span class="u-m"><span class="mini"><i style="width:' + Math.round(c.pct) + '%"></i></span><span>' + esc(c.meta) + '</span></span></span>';
+    b.addEventListener('click', () => openReader(c.view));
+    li.appendChild(b); el.readList.appendChild(li);
+  });
+}
+
+/* ---------- wiring ---------- */
+el.pNext.addEventListener('click', () => { if (footAction && !el.pNext.disabled) footAction(); });
+el.pExit.addEventListener('click', exitPlay);
+R.back.addEventListener('click', backReader);
+R.next.addEventListener('click', () => { if (rd.act) rd.act(); });
+el.soundBtn.addEventListener('click', () => { state.sound = !state.sound; touch(); renderSound(); });
+document.addEventListener('keydown', e => {
+  if (reading && !playing && e.key === 'Enter' && !R.foot.hidden && document.activeElement === document.body){ e.preventDefault(); rd.act && rd.act(); return; }
+  if (!playing || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key >= '1' && e.key <= '4' && S.cur && S.cur.t === 'q' && S.cur.kind !== 'build' && !S.locked){
+    const bs = el.pStage.querySelectorAll('.opt'), i = +e.key - 1;
+    if (bs[i]) choose(i);
+    return;
+  }
+  if (e.key === 'Enter' && !el.pFoot.hidden && !el.pNext.disabled && document.activeElement === document.body){ e.preventDefault(); footAction && footAction(); }
+});
+if (canSpeak){ loadVoices(); try { speechSynthesis.onvoiceschanged = loadVoices; } catch (e) {} }
+
+refreshAll();
+initRemote();
+})();
+</script>
